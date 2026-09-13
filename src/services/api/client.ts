@@ -3,19 +3,19 @@ import { getAuditorSession } from '../auth/session-context';
 
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 
-// Constitution Principle III: HTTPS only, with an explicit loopback exception
-// for local development against a backend running on the same machine/emulator
-// (10.0.2.2 is the Android emulator's alias for the host machine). Checked
+// Constitution Principle III: HTTPS only in a real (production) build. In a
+// dev/Metro-connected build (__DEV__), any http:// URL is allowed, since a
+// developer may legitimately point EXPO_PUBLIC_API_URL at localhost, a LAN IP
+// (physical device on Wi-Fi), 10.0.2.2 (Android emulator), or a tunnel URL —
+// there is no fixed list of "local" hosts that covers all of those. Checked
 // lazily (on first actual request) rather than at module load, so a
 // misconfigured URL surfaces as a clear runtime error instead of crashing the
 // whole bundle before anything can render (e.g. during `expo export`).
-const LOOPBACK_BASE_URL = /^https?:\/\/(localhost|127\.0\.0\.1|10\.0\.2\.2)(:\d+)?(\/|$)/;
-
 function assertSecureBaseUrl(url: string): void {
-  if (!url || (!url.startsWith('https://') && !LOOPBACK_BASE_URL.test(url))) {
+  if (!url || (!url.startsWith('https://') && !(__DEV__ && url.startsWith('http://')))) {
     throw new Error(
-      'EXPO_PUBLIC_API_URL must be an HTTPS URL (http://localhost is allowed for local ' +
-        'development only). See .env.example.',
+      'EXPO_PUBLIC_API_URL must be an HTTPS URL (a plain http:// URL is only allowed in a ' +
+        'development build). See .env.example.',
     );
   }
 }

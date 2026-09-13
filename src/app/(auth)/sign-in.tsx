@@ -108,11 +108,14 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   input: {
+    // paddingVertical: Spacing.three (not .two) so the tappable field is at
+    // least ~44pt tall (mobile-touch-ergonomics skill, rule 2) — .two left it
+    // under the floor.
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#8888',
     borderRadius: Spacing.two,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
+    paddingVertical: Spacing.three,
     fontSize: 16,
   },
   error: {

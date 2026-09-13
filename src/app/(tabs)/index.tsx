@@ -1,31 +1,52 @@
 import { useEffect, useState } from 'react';
-import { FlatList, Pressable, StyleSheet } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ProgressBar } from '@/components/progress-bar';
+import { colorTokenFor, StatusBadge } from '@/components/status-badge';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { AUDITS_POLL_INTERVAL_MS, useAudits } from '@/services/api/use-audits';
-import { useLogout } from '@/services/auth/use-logout';
 import type { Audit } from '@/services/api/types';
+import { useLogout } from '@/services/auth/use-logout';
 
 const STALE_THRESHOLD_MS = AUDITS_POLL_INTERVAL_MS * 1.5;
 
 function AuditRow({ audit }: { audit: Audit }) {
+  const theme = useTheme();
+  const accentColor = theme[colorTokenFor(audit.status)];
+
   return (
     <ThemedView type="backgroundElement" style={styles.auditCard}>
-      <ThemedText type="smallBold">{audit.name}</ThemedText>
-      <ThemedText type="small" themeColor="textSecondary">
-        Status: {audit.status}
-      </ThemedText>
-      {audit.testBatteries.map((battery) => (
-        <ThemedText key={battery.id} type="small">
-          {battery.name} — {battery.status} ({battery.progressPercent}%)
+      <View style={[styles.accentStripe, { backgroundColor: accentColor }]} />
+      <View style={styles.auditCardContent}>
+        <View style={styles.auditHeaderRow}>
+          <ThemedText type="smallBold" style={styles.auditName}>
+            {audit.name.toUpperCase()}
+          </ThemedText>
+          <StatusBadge status={audit.status} />
+        </View>
+
+        <View style={styles.batteryList}>
+          {audit.testBatteries.map((battery) => (
+            <View key={battery.id} style={styles.batteryRow}>
+              <View style={styles.batteryHeaderRow}>
+                <ThemedText type="small" themeColor="textSecondary" style={styles.batteryName}>
+                  {battery.name}
+                </ThemedText>
+                <StatusBadge status={battery.status} size="small" />
+              </View>
+              <ProgressBar progress={battery.progressPercent} color={theme[colorTokenFor(battery.status)]} />
+            </View>
+          ))}
+        </View>
+
+        <ThemedText type="code" themeColor="textSecondary" style={styles.metricsLine}>
+          {audit.metrics.requestsSent} req · {audit.metrics.pagesScanned} pages
         </ThemedText>
-      ))}
-      <ThemedText type="small" themeColor="textSecondary">
-        {audit.metrics.requestsSent} requests · {audit.metrics.pagesScanned} pages scanned
-      </ThemedText>
+      </View>
     </ThemedView>
   );
 }
@@ -33,6 +54,7 @@ function AuditRow({ audit }: { audit: Audit }) {
 export default function MonitoringPanelScreen() {
   const { data: audits, dataUpdatedAt, isLoading, isError } = useAudits();
   const logout = useLogout();
+  const theme = useTheme();
   const [now, setNow] = useState(() => Date.now());
 
   // Re-evaluate staleness once a second so the indicator updates even if no
@@ -49,10 +71,17 @@ export default function MonitoringPanelScreen() {
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ThemedView style={styles.header}>
           <ThemedText type="title" style={styles.headerTitle}>
-            Monitoring
+            MONITORING
           </ThemedText>
-          <Pressable accessibilityRole="button" onPress={() => logout()}>
-            <ThemedText type="link">Sign out</ThemedText>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Sign out"
+            onPress={() => logout()}
+            style={({ pressed }) => [
+              styles.signOutButton,
+              { backgroundColor: theme.backgroundElement, opacity: pressed ? 0.6 : 1 },
+            ]}>
+            <ThemedText type="smallBold">⏻</ThemedText>
           </Pressable>
         </ThemedView>
 
@@ -111,12 +140,20 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     lineHeight: 32,
+    letterSpacing: 0.5,
+  },
+  signOutButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   staleBanner: {
     marginHorizontal: Spacing.four,
     marginBottom: Spacing.two,
     padding: Spacing.two,
-    borderRadius: Spacing.two,
+    borderRadius: 4,
   },
   centerMessage: {
     textAlign: 'center',
@@ -129,8 +166,43 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   auditCard: {
-    borderRadius: Spacing.three,
+    flexDirection: 'row',
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  accentStripe: {
+    width: 6,
+  },
+  auditCardContent: {
+    flex: 1,
     padding: Spacing.three,
-    gap: Spacing.one,
+    gap: Spacing.two,
+  },
+  auditHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  auditName: {
+    flex: 1,
+    letterSpacing: 0.3,
+  },
+  batteryList: {
+    gap: Spacing.two,
+  },
+  batteryRow: {
+    gap: Spacing.half,
+  },
+  batteryHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  batteryName: {
+    flex: 1,
+  },
+  metricsLine: {
+    marginTop: Spacing.one,
   },
 });

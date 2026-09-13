@@ -16,15 +16,33 @@ export const Colors = {
     textSecondary: '#60646C',
     tint: '#208AEF',
     danger: '#D0342C',
+    success: '#2E7D32',
+    // Severity badges (see severity-data-display skill) — color + icon + text
+    // together, never color alone.
+    severityCritical: '#B3261E',
+    severityHigh: '#C4560C',
+    severityMedium: '#A66A00',
+    severityLow: '#3A6B35',
   },
   dark: {
     text: '#ffffff',
+    // Pure black on purpose: OLED screens draw ~zero power per black pixel.
+    // Do not "soften" this to a dark gray for aesthetics — see
+    // severity-data-display skill, section 5.
     background: '#000000',
     backgroundElement: '#212225',
     backgroundSelected: '#2E3135',
     textSecondary: '#B0B4BA',
     tint: '#3C9FFE',
     danger: '#FF6B60',
+    success: '#7BC67E',
+    // Deliberately lighter/less saturated than the light-mode values above —
+    // a saturated "red-500"-equivalent on a black background is harder to
+    // read in bright/outdoor conditions. Never reuse the light-mode hex here.
+    severityCritical: '#F2867B',
+    severityHigh: '#F5A968',
+    severityMedium: '#E8C468',
+    severityLow: '#8FC48A',
   },
 } as const;
 

@@ -10,6 +10,24 @@ Built with [Spec-Driven Development](https://github.com/github/spec-kit) — see
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+## No backend yet? Use the mock server
+
+There is no real backend yet. `mock-server/` implements
+`specs/001-auditor-mobile-console/contracts/*.md` in-memory so the app can be run end-to-end:
+
+```bash
+npm run mock-server        # starts http://localhost:4000
+```
+
+Then set `EXPO_PUBLIC_API_URL=http://localhost:4000` in `.env` (copy `.env.example`; use
+`http://10.0.2.2:4000` instead on the Android emulator) and sign in with:
+
+- `auditor1@example.com` / `password123` — sees Audit Alpha (running, live progress) + Audit Beta
+- `auditor2@example.com` / `password123` — sees Audit Gamma only (for testing permission scoping)
+
+Access tokens expire after 60 seconds on purpose, so the app's silent session-refresh is easy to
+observe during normal use instead of waiting 15+ minutes.
+
 ## Get started
 
 1. Install dependencies
