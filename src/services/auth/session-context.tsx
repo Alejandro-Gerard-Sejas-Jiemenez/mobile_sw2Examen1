@@ -1,16 +1,8 @@
 import { useSyncExternalStore } from 'react';
+import type { AuditorIdentity, AuditorSession, UseAuditorSessionReturn } from './types';
 
-export type AuditorIdentity = {
-  auditorId: string;
-  displayName: string;
-  role: string;
-};
+export type { AuditorIdentity, AuditorSession, UseAuditorSessionReturn };
 
-export type AuditorSession = {
-  accessToken: string;
-  accessTokenExpiresAt: string; // ISO datetime
-  auditor: AuditorIdentity;
-};
 
 type Listener = () => void;
 
@@ -43,10 +35,7 @@ function subscribe(listener: Listener): () => void {
 }
 
 /** React hook: re-renders whenever the in-memory session changes. */
-export function useAuditorSession(): {
-  session: AuditorSession | null;
-  isAuthenticated: boolean;
-} {
+export function useAuditorSession(): UseAuditorSessionReturn {
   const session = useSyncExternalStore(subscribe, getAuditorSession, getAuditorSession);
   return { session, isAuthenticated: session !== null };
 }

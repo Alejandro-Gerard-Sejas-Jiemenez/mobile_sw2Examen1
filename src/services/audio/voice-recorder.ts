@@ -6,6 +6,8 @@ import {
   createAudioPlayer,
   type AudioPlayer,
 } from 'expo-audio';
+import { AUDIO_CONSTANTS } from '@/constants/audio.constants';
+import { AudioError } from '@/errors/audio-error';
 
 export interface RecordingResult {
   uri: string | null;
@@ -48,7 +50,10 @@ export class SafeVoiceRecorder {
   }
 
   async stop(): Promise<RecordingResult> {
-    const elapsedSeconds = Math.max(1, Math.round((Date.now() - this.startTime) / 1000));
+    const elapsedSeconds = Math.max(
+      AUDIO_CONSTANTS.MIN_RECORDING_DURATION_SECONDS,
+      Math.round((Date.now() - this.startTime) / AUDIO_CONSTANTS.RECORDING_TIMER_INTERVAL_MS)
+    );
     let fileUri: string | null = null;
 
     if (this.activeRecorder) {
@@ -56,7 +61,12 @@ export class SafeVoiceRecorder {
         await this.activeRecorder.stop();
         fileUri = this.activeRecorder.uri || null;
       } catch (err) {
-        console.warn('[voice-recorder] Error stopping native recorder:', err);
+        const audioErr = new AudioError(
+          'AUDIO_RECORDING_STOP_FAILED',
+          'Failed to gracefully stop native audio recorder',
+          { cause: err }
+        );
+        console.warn(audioErr.message);
       } finally {
         this.activeRecorder = null;
       }
@@ -85,7 +95,12 @@ export class SafeVoiceRecorder {
       this.activePlayer = createAudioPlayer(uri);
       this.activePlayer.play();
     } catch (err) {
-      console.warn('[voice-recorder] Error playing audio:', err);
+      const audioErr = new AudioError(
+        'AUDIO_PLAYBACK_FAILED',
+        `Failed to play audio file at ${uri}`,
+        { cause: err }
+      );
+      console.warn(audioErr.message);
     }
   }
 

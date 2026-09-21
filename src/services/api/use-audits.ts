@@ -5,8 +5,9 @@ import { AppState, type AppStateStatus } from 'react-native';
 import { apiRequest } from './client';
 import type { Audit } from './types';
 import { auditStore } from './audit-store';
+import { API_ENDPOINTS, API_POLL_INTERVALS_MS, QUERY_KEYS } from '../../constants/api.constants';
 
-export const AUDITS_POLL_INTERVAL_MS = 2500; // Fast live polling for real-time progress updates
+export const AUDITS_POLL_INTERVAL_MS = API_POLL_INTERVALS_MS.AUDITS_FAST;
 
 function useIsAppForegrounded(): boolean {
   const [isForegrounded, setIsForegrounded] = useState(AppState.currentState === 'active');
@@ -29,10 +30,10 @@ export function useAudits(): UseQueryResult<Audit[]> {
   const isForegrounded = useIsAppForegrounded();
 
   return useQuery({
-    queryKey: ['audits'],
+    queryKey: QUERY_KEYS.AUDITS,
     queryFn: async () => {
       try {
-        const response = await apiRequest<{ audits: Audit[] }>('/audits?status=running,completed,paused');
+        const response = await apiRequest<{ audits: Audit[] }>(API_ENDPOINTS.AUDITS_QUERY);
         if (response && response.audits && response.audits.length > 0) {
           return response.audits;
         }

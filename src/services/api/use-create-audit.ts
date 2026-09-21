@@ -1,14 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from './client';
 import { auditStore } from './audit-store';
-import type { Audit } from './types';
+import type { Audit, CreateAuditInput } from './types';
+import { API_ENDPOINTS, QUERY_KEYS } from '../../constants/api.constants';
 
-export interface CreateAuditInput {
-  targetUrl: string;
-  name?: string;
-  usuario?: string;
-  contrasena?: string;
-}
+export type { CreateAuditInput };
+
 
 export function useCreateAudit() {
   const queryClient = useQueryClient();
@@ -19,7 +16,7 @@ export function useCreateAudit() {
 
       // 1. Guardar en la base de datos de Django de Parcial1Software2 (/api/software/)
       try {
-        await apiRequest('/software/', {
+        await apiRequest(API_ENDPOINTS.SOFTWARE, {
           method: 'POST',
           body: {
             name: auditName,
@@ -36,7 +33,7 @@ export function useCreateAudit() {
 
       // 2. Disparar escaneo en el backend ofensivo si está en el puerto (/api/descubrimientos/)
       try {
-        await apiRequest('/api/descubrimientos/', {
+        await apiRequest(API_ENDPOINTS.DESCUBRIMIENTOS, {
           method: 'POST',
           body: {
             url: input.targetUrl,
@@ -53,7 +50,7 @@ export function useCreateAudit() {
       return audit;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['audits'] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.AUDITS });
     },
   });
 }

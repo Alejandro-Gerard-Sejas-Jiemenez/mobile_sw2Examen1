@@ -1,17 +1,12 @@
 import Constants from 'expo-constants';
-// import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 let Notifications: any = null;
-// Push notifications disabled in development to prevent Expo Go crashes
-// try {
-//   Notifications = require('expo-notifications');
-// } catch (e) {
-//   // Ignored in Expo Go
-// }
 
 import { apiRequest } from '../api/client';
 import { getAuditorSession } from '../auth/session-context';
+import { API_ENDPOINTS } from '../../constants/api.constants';
+import type { PushTokenRegistrationPayload } from './types';
 
 /**
  * Registers this device's Expo push token with the backend
@@ -69,9 +64,14 @@ export async function registerPushToken(): Promise<void> {
       return;
     }
 
-    await apiRequest('/devices/push-token', {
+    const payload: PushTokenRegistrationPayload = {
+      pushToken,
+      platform: Platform.OS,
+    };
+
+    await apiRequest(API_ENDPOINTS.DEVICES_PUSH_TOKEN, {
       method: 'POST',
-      body: { pushToken, platform: Platform.OS },
+      body: payload,
     });
   } catch (error) {
     if (__DEV__) {
@@ -79,3 +79,4 @@ export async function registerPushToken(): Promise<void> {
     }
   }
 }
+

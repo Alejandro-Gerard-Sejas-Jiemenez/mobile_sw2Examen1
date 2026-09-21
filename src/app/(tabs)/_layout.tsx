@@ -1,22 +1,22 @@
 import { Tabs } from 'expo-router';
-import { useColorScheme, Image } from 'react-native';
+import { Image } from 'react-native';
 
-import { Colors } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
+import { tabsStyles } from '@/styles';
 
 export default function AppTabs() {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const theme = useTheme();
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: colors.background,
-          borderTopColor: colors.backgroundElement,
+          backgroundColor: theme.background,
+          borderTopColor: theme.backgroundElement,
         },
-        tabBarActiveTintColor: colors.tint,
-        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarActiveTintColor: theme.tint,
+        tabBarInactiveTintColor: theme.textSecondary,
       }}>
       <Tabs.Screen
         name="index"
@@ -25,7 +25,7 @@ export default function AppTabs() {
           tabBarIcon: ({ color, size }) => (
             <Image
               source={require('@/assets/images/tabIcons/home.png')}
-              style={{ width: size || 24, height: size || 24, tintColor: color }}
+              style={[tabsStyles.tabIcon, { width: size || 24, height: size || 24, tintColor: color }]}
               resizeMode="contain"
             />
           ),
@@ -38,7 +38,7 @@ export default function AppTabs() {
           tabBarIcon: ({ color, size }) => (
             <Image
               source={require('@/assets/images/tabIcons/explore.png')}
-              style={{ width: size || 24, height: size || 24, tintColor: color }}
+              style={[tabsStyles.tabIcon, { width: size || 24, height: size || 24, tintColor: color }]}
               resizeMode="contain"
             />
           ),

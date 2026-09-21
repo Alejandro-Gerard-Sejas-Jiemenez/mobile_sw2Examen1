@@ -5,6 +5,7 @@ import type { ReportFormat } from './types';
 import { auditStore } from './audit-store';
 import { buildHtmlReport, buildMarkdownReport, type ReportTone } from '../reports/report-synthesizer';
 import { isModelDownloaded } from '../ai/model-manager';
+import { API_ENDPOINTS, QUERY_KEYS } from '../../constants/api.constants';
 
 /**
  * GET /audits/{auditId}/report/preview?format=pdf|markdown (contracts/monitoring.md) — a preview
@@ -17,11 +18,11 @@ export function useReportPreview(
   customPrompt: string = ''
 ): UseQueryResult<string> {
   return useQuery({
-    queryKey: ['audits', auditId, 'report-preview', format, tone, customPrompt],
+    queryKey: QUERY_KEYS.REPORT_PREVIEW(auditId, format, tone, customPrompt),
     queryFn: async () => {
       try {
         const remote = await apiRequestText(
-          `/audits/${auditId}/report/preview?format=${format}&tone=${tone}`
+          API_ENDPOINTS.reportPreview(auditId, format, tone)
         );
         if (remote && remote.trim().length > 0) return remote;
       } catch {

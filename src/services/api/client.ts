@@ -1,5 +1,8 @@
 import { refreshSession } from '../auth/refresh-mutex';
 import { getAuditorSession } from '../auth/session-context';
+import { NETWORK_ERROR_CODES, NetworkError, type NetworkErrorCode } from '../../errors/network-error';
+import { HTTP_STATUS } from '../../constants/api.constants';
+import type { ApiRequestOptions } from './types';
 
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 
@@ -13,27 +16,37 @@ export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 // whole bundle before anything can render (e.g. during `expo export`).
 function assertSecureBaseUrl(url: string): void {
   if (!url || (!url.startsWith('https://') && !(__DEV__ && url.startsWith('http://')))) {
-    throw new Error(
+    throw new NetworkError(
+      NETWORK_ERROR_CODES.NETWORK_REQUEST_FAILED,
       'EXPO_PUBLIC_API_URL must be an HTTPS URL (a plain http:// URL is only allowed in a ' +
         'development build). See .env.example.',
     );
   }
 }
 
-export class ApiError extends Error {
-  status: number;
-  constructor(status: number, message: string) {
-    super(message);
+export class ApiError extends NetworkError {
+  public readonly status: number;
+
+  constructor(status: number, message: string, context?: Record<string, unknown>) {
+    const code: NetworkErrorCode =
+      status === HTTP_STATUS.UNAUTHORIZED
+        ? NETWORK_ERROR_CODES.NETWORK_UNAUTHORIZED
+        : status === HTTP_STATUS.FORBIDDEN
+        ? NETWORK_ERROR_CODES.NETWORK_FORBIDDEN
+        : status === HTTP_STATUS.NOT_FOUND
+        ? NETWORK_ERROR_CODES.NETWORK_NOT_FOUND
+        : status >= HTTP_STATUS.INTERNAL_SERVER_ERROR
+        ? NETWORK_ERROR_CODES.NETWORK_SERVER_ERROR
+        : NETWORK_ERROR_CODES.NETWORK_REQUEST_FAILED;
+
+    super(code, message, status, context);
     this.name = 'ApiError';
     this.status = status;
   }
 }
 
-export type ApiRequestOptions = Omit<RequestInit, 'body'> & {
-  body?: unknown;
-  /** Skip attaching the Authorization header and the 401-refresh retry (e.g. login itself). */
-  skipAuth?: boolean;
-};
+export type { ApiRequestOptions };
+
 
 async function rawRequest(path: string, options: ApiRequestOptions): Promise<Response> {
   assertSecureBaseUrl(API_BASE_URL);
@@ -65,7 +78,7 @@ async function rawRequest(path: string, options: ApiRequestOptions): Promise<Res
 async function authenticatedFetch(path: string, options: ApiRequestOptions): Promise<Response> {
   let response = await rawRequest(path, options);
 
-  if (response.status === 401 && !options.skipAuth) {
+  if (response.status === HTTP_STATUS.UNAUTHORIZED && !options.skipAuth) {
     // Throws (and clears the session) if the refresh itself fails — that
     // rejection propagates to the caller, and the auth guard reacts to the
     // now-null session by returning the auditor to sign-in.
@@ -85,7 +98,7 @@ async function authenticatedFetch(path: string, options: ApiRequestOptions): Pro
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
   const response = await authenticatedFetch(path, options);
 
-  if (response.status === 204) {
+  if (response.status === HTTP_STATUS.NO_CONTENT) {
     return undefined as T;
   }
 

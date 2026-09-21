@@ -1,11 +1,10 @@
 import type { useRouter } from 'expo-router';
+import type { NotificationRouteResolution, NotificationDataPayload } from './types';
+import { NOTIFICATION_SCREENS, NOTIFICATION_ROUTES } from '../../constants/api.constants';
 
 type ExpoRouter = ReturnType<typeof useRouter>;
 
-export type NotificationRouteResolution =
-  | { screen: 'finding-detail'; findingId: string }
-  | { screen: 'audit-detail'; auditId: string }
-  | { screen: 'alerts-list' };
+export type { NotificationRouteResolution };
 
 /**
  * Resolves a push notification's `data` payload against the fixed route
@@ -16,19 +15,27 @@ export type NotificationRouteResolution =
  * it can be unit-tested on its own (tasks.md T041).
  */
 export function resolveNotificationRoute(
-  data: Record<string, unknown> | undefined | null,
+  data: NotificationDataPayload | Record<string, unknown> | undefined | null,
 ): NotificationRouteResolution {
   const route = data?.route;
 
-  if (route === 'finding-detail' && typeof data?.findingId === 'string' && data.findingId.length > 0) {
-    return { screen: 'finding-detail', findingId: data.findingId };
+  if (
+    route === NOTIFICATION_SCREENS.FINDING_DETAIL &&
+    typeof data?.findingId === 'string' &&
+    data.findingId.length > 0
+  ) {
+    return { screen: NOTIFICATION_SCREENS.FINDING_DETAIL, findingId: data.findingId };
   }
 
-  if (route === 'audit-detail' && typeof data?.auditId === 'string' && data.auditId.length > 0) {
-    return { screen: 'audit-detail', auditId: data.auditId };
+  if (
+    route === NOTIFICATION_SCREENS.AUDIT_DETAIL &&
+    typeof data?.auditId === 'string' &&
+    data.auditId.length > 0
+  ) {
+    return { screen: NOTIFICATION_SCREENS.AUDIT_DETAIL, auditId: data.auditId };
   }
 
-  return { screen: 'alerts-list' };
+  return { screen: NOTIFICATION_SCREENS.ALERTS_LIST };
 }
 
 /**
@@ -41,25 +48,26 @@ export function resolveNotificationRoute(
  */
 export function navigateForNotification(
   router: ExpoRouter,
-  data: Record<string, unknown> | undefined | null,
+  data: NotificationDataPayload | Record<string, unknown> | undefined | null,
 ): void {
   const resolution = resolveNotificationRoute(data);
 
   switch (resolution.screen) {
-    case 'finding-detail':
+    case NOTIFICATION_SCREENS.FINDING_DETAIL:
       router.push({
-        pathname: '/(tabs)/findings/[findingId]',
+        pathname: NOTIFICATION_ROUTES.FINDING_DETAIL,
         params: { findingId: resolution.findingId },
       });
       break;
-    case 'audit-detail':
+    case NOTIFICATION_SCREENS.AUDIT_DETAIL:
       router.push({
-        pathname: '/(tabs)/audits/[auditId]/findings',
+        pathname: NOTIFICATION_ROUTES.AUDIT_DETAIL,
         params: { auditId: resolution.auditId },
       });
       break;
-    case 'alerts-list':
+    case NOTIFICATION_SCREENS.ALERTS_LIST:
     default:
-      router.push('/(tabs)/alerts');
+      router.push(NOTIFICATION_ROUTES.ALERTS_LIST);
   }
 }
+

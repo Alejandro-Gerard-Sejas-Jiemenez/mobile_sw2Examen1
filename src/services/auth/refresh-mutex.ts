@@ -1,12 +1,8 @@
 import { clearRefreshToken, getRefreshToken, setRefreshToken } from './secure-token-store';
-import { clearAuditorSession, setAuditorSession, type AuditorSession } from './session-context';
-
-type RefreshResponse = {
-  accessToken: string;
-  accessTokenExpiresAt: string;
-  refreshToken: string;
-  auditor: AuditorSession['auditor'];
-};
+import { clearAuditorSession, setAuditorSession } from './session-context';
+import type { AuditorSession, RefreshResponse } from './types';
+import { API_ENDPOINTS } from '../../constants/api.constants';
+import { NETWORK_ERROR_CODES, NetworkError } from '../../errors/network-error';
 
 let inFlightRefresh: Promise<AuditorSession> | null = null;
 
@@ -31,10 +27,14 @@ async function performRefresh(apiBaseUrl: string): Promise<AuditorSession> {
   const refreshToken = await getRefreshToken();
   if (!refreshToken) {
     clearAuditorSession();
-    throw new Error('No refresh token available');
+    throw new NetworkError(
+      NETWORK_ERROR_CODES.NETWORK_UNAUTHORIZED,
+      'No refresh token available'
+    );
   }
 
-  const response = await fetch(`${apiBaseUrl}/auth/refresh`, {
+  const endpoint = `${apiBaseUrl}${API_ENDPOINTS.AUTH_REFRESH}`;
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken }),
@@ -47,7 +47,11 @@ async function performRefresh(apiBaseUrl: string): Promise<AuditorSession> {
     // theft (Constitution Principle I).
     await clearRefreshToken();
     clearAuditorSession();
-    throw new Error('Session refresh failed');
+    throw new NetworkError(
+      NETWORK_ERROR_CODES.NETWORK_UNAUTHORIZED,
+      'Session refresh failed',
+      response.status
+    );
   }
 
   const data = (await response.json()) as RefreshResponse;
@@ -63,3 +67,4 @@ async function performRefresh(apiBaseUrl: string): Promise<AuditorSession> {
   setAuditorSession(session);
   return session;
 }
+

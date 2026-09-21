@@ -1,0 +1,37 @@
+/**
+ * Reports Domain Types & Interfaces
+ * Single source of truth for synthesis options, tone classifications, risk assessments, and mitigation matrices.
+ */
+
+import type { Audit, Finding } from '../api/types';
+import type { VectorSearchResult } from '../ai/vector-memory';
+
+export type ReportTone = 'executive' | 'technical' | 'compliance' | 'custom';
+
+export type OverallRiskLevel = 'CRÍTICO' | 'ALTO' | 'MEDIO' | 'BAJO' | 'SEGURO';
+
+export interface MitigationItem {
+  findingTitle: string;
+  actionableStep: string;
+  codeExample: string;
+  vectorRef: string;
+}
+
+export interface DynamicDiagnosis {
+  overallRiskLevel: OverallRiskLevel;
+  riskScore: number;
+  complianceImpact: string;
+  threatSummary: string;
+  toneHeading: string;
+  retrievedVectors: VectorSearchResult[];
+  learnedRulesCount: number;
+  mitigationMatrix: MitigationItem[];
+}
+
+export interface SynthesizeOptions {
+  audit: Audit;
+  findings: Finding[];
+  isAiLocalActive?: boolean;
+  tone?: ReportTone;
+  auditorCustomDirectives?: string;
+}

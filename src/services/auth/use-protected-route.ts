@@ -2,6 +2,7 @@ import { useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 
 import { useAuditorSession } from './session-context';
+import { AUTH_ROUTES } from '../../constants/api.constants';
 
 /**
  * Redirects between the (auth) and (tabs) route groups based on session state.
@@ -20,12 +21,13 @@ export function useProtectedRoute(skip: boolean): void {
       return;
     }
 
-    const inAuthGroup = segments[0] === '(auth)';
+    const inAuthGroup = segments[0] === AUTH_ROUTES.AUTH_GROUP;
 
     if (!isAuthenticated && !inAuthGroup) {
-      router.replace('/(auth)/sign-in');
+      router.replace(AUTH_ROUTES.SIGN_IN);
     } else if (isAuthenticated && inAuthGroup) {
-      router.replace('/(tabs)');
+      router.replace(AUTH_ROUTES.TABS);
     }
   }, [skip, isAuthenticated, segments, router]);
 }
+

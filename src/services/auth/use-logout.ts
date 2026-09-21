@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { apiRequest } from '../api/client';
 import { clearRefreshToken } from './secure-token-store';
 import { clearAuditorSession } from './session-context';
+import { API_ENDPOINTS } from '../../constants/api.constants';
 
 /**
  * Signs the auditor out. Local session state is cleared regardless of whether
@@ -15,14 +16,14 @@ export function useLogout(): () => Promise<void> {
       // Disassociate this device's push token first (Constitution Principle
       // IV / contracts/notifications.md), while the access token can still
       // authenticate the call — before /auth/logout invalidates it.
-      await apiRequest('/devices/push-token', { method: 'DELETE' });
+      await apiRequest(API_ENDPOINTS.DEVICES_PUSH_TOKEN, { method: 'DELETE' });
     } catch {
       // Ignored: no token may have been registered, or the call failed —
       // either way, sign-out must still proceed.
     }
 
     try {
-      await apiRequest('/auth/logout', { method: 'POST' });
+      await apiRequest(API_ENDPOINTS.AUTH_LOGOUT, { method: 'POST' });
     } catch {
       // Ignored: we still clear local state below.
     } finally {
@@ -31,3 +32,4 @@ export function useLogout(): () => Promise<void> {
     }
   }, []);
 }
+

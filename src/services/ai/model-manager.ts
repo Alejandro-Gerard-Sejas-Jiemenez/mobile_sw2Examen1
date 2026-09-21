@@ -1,4 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
+import { TARGET_MODEL_SPECS } from '@/constants/ai.constants';
+import { STORAGE_FILENAMES } from '@/constants/storage.constants';
+import { StorageError } from '@/errors/storage-error';
 
 export interface ModelInfo {
   name: string;
@@ -9,14 +12,14 @@ export interface ModelInfo {
 }
 
 export const TARGET_AI_MODEL: ModelInfo = {
-  name: 'Llama 3.2 1B Instruct (Q4_K_M)',
-  filename: 'Llama-3.2-1B-Instruct-Q4_K_M.gguf',
-  url: 'https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf',
-  sizeBytes: 846927872, // ~807.69 MB
-  sizeFormatted: '807.69 MB',
+  name: TARGET_MODEL_SPECS.NAME,
+  filename: TARGET_MODEL_SPECS.FILENAME,
+  url: TARGET_MODEL_SPECS.URL,
+  sizeBytes: TARGET_MODEL_SPECS.SIZE_BYTES,
+  sizeFormatted: TARGET_MODEL_SPECS.SIZE_FORMATTED,
 };
 
-const MODELS_DIR = `${FileSystem.documentDirectory || ''}models/`;
+const MODELS_DIR = `${FileSystem.documentDirectory || ''}${STORAGE_FILENAMES.MODELS_DIRECTORY}`;
 const MODEL_FILE_PATH = `${MODELS_DIR}${TARGET_AI_MODEL.filename}`;
 
 export interface DownloadProgress {
@@ -82,7 +85,10 @@ export async function downloadAiModel(
 
   const result = await downloadResumable.downloadAsync();
   if (!result || !result.uri) {
-    throw new Error('Download failed or returned empty URI.');
+    throw new StorageError('STORAGE_WRITE_FAILED', 'AI Model download failed or returned empty URI.', {
+      url: TARGET_AI_MODEL.url,
+      destination: MODEL_FILE_PATH,
+    });
   }
 
   return result.uri;
@@ -94,6 +100,10 @@ export async function downloadAiModel(
 export async function deleteAiModel(): Promise<void> {
   const check = await isModelDownloaded();
   if (check.exists) {
-    await FileSystem.deleteAsync(MODEL_FILE_PATH, { idempotent: true });
+    try {
+      await FileSystem.deleteAsync(MODEL_FILE_PATH, { idempotent: true });
+    } catch (err) {
+      throw new StorageError('STORAGE_DELETE_FAILED', `Failed to delete AI model at ${MODEL_FILE_PATH}`, { cause: err });
+    }
   }
 }

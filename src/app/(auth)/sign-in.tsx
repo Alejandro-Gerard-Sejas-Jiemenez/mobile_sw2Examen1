@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, TextInput } from 'react-native';
+import { ActivityIndicator, Pressable, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { ThemedText, ThemedView } from '@/components';
 import { useTheme } from '@/hooks/use-theme';
-import { useLogin } from '@/services/auth/use-login';
+import { useLogin } from '@/services/auth';
+import { signInStyles } from '@/styles';
 
 export default function SignInScreen() {
   const [email, setEmail] = useState('');
@@ -19,21 +18,21 @@ export default function SignInScreen() {
   const handleSubmit = () => {
     if (!canSubmit) return;
     login(email.trim(), password).catch(() => {
-      // Error state is already surfaced via the `error` value from useLogin.
+      // Error state is surfaced via the `error` state from useLogin.
     });
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title" style={styles.title}>
+    <ThemedView style={signInStyles.container}>
+      <SafeAreaView style={signInStyles.safeArea}>
+        <ThemedText type="title" style={signInStyles.title}>
           Auditor Console
         </ThemedText>
-        <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
+        <ThemedText type="small" themeColor="textSecondary" style={signInStyles.subtitle}>
           Sign in with your platform credentials
         </ThemedText>
 
-        <ThemedView type="backgroundElement" style={styles.form}>
+        <ThemedView type="backgroundElement" style={signInStyles.form}>
           <TextInput
             value={email}
             onChangeText={setEmail}
@@ -42,7 +41,7 @@ export default function SignInScreen() {
             autoCapitalize="none"
             autoComplete="email"
             keyboardType="email-address"
-            style={[styles.input, { color: theme.text }]}
+            style={[signInStyles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
           />
           <TextInput
             value={password}
@@ -51,21 +50,22 @@ export default function SignInScreen() {
             placeholderTextColor={theme.textSecondary}
             secureTextEntry
             autoComplete="password"
-            style={[styles.input, { color: theme.text }]}
+            style={[signInStyles.input, { color: theme.text, borderColor: theme.backgroundSelected }]}
           />
 
           {error ? (
-            <ThemedText type="small" themeColor="danger" style={styles.error}>
+            <ThemedText type="small" themeColor="danger" style={signInStyles.error}>
               {error}
             </ThemedText>
           ) : null}
 
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel="Sign in"
             disabled={!canSubmit}
             onPress={handleSubmit}
             style={({ pressed }) => [
-              styles.submitButton,
+              signInStyles.submitButton,
               { backgroundColor: theme.tint, opacity: canSubmit && !pressed ? 1 : 0.6 },
             ]}>
             {isSubmitting ? (
@@ -81,50 +81,3 @@ export default function SignInScreen() {
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.three,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  subtitle: {
-    textAlign: 'center',
-    marginBottom: Spacing.three,
-  },
-  form: {
-    width: '100%',
-    maxWidth: MaxContentWidth,
-    borderRadius: Spacing.four,
-    padding: Spacing.four,
-    gap: Spacing.three,
-  },
-  input: {
-    // paddingVertical: Spacing.three (not .two) so the tappable field is at
-    // least ~44pt tall (mobile-touch-ergonomics skill, rule 2) — .two left it
-    // under the floor.
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#8888',
-    borderRadius: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-    fontSize: 16,
-  },
-  error: {
-    textAlign: 'center',
-  },
-  submitButton: {
-    borderRadius: Spacing.two,
-    paddingVertical: Spacing.three,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

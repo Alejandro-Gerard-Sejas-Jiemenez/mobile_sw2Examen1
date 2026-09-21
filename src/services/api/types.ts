@@ -1,5 +1,9 @@
-// Shapes as consumed/displayed by this client. The backend is the source of
-// truth (data-model.md) — these mirror it, they do not redefine it.
+/**
+ * API Domain Types & Interfaces
+ * Single source of truth for API contracts, mutations, query responses, and client options.
+ */
+
+// --- Status & Enum Types ---
 
 export type AuditStatus = 'running' | 'completed' | 'paused';
 
@@ -16,6 +20,51 @@ export type AlertReadState = 'unread' | 'read';
 export type ReportFormat = 'pdf' | 'markdown';
 
 export type ReportStatus = 'previewing' | 'compiling' | 'ready' | 'failed';
+
+export type DescubrimientoStatus = 'pendiente' | 'en_progreso' | 'completado' | 'fallido';
+
+// --- Client & Request Interfaces ---
+
+export type ApiRequestOptions = Omit<RequestInit, 'body'> & {
+  body?: unknown;
+  /** Skip attaching the Authorization header and the 401-refresh retry (e.g. login itself). */
+  skipAuth?: boolean;
+};
+
+// --- Mutation & Input Interfaces ---
+
+export interface CreateAuditInput {
+  targetUrl: string;
+  name?: string;
+  usuario?: string;
+  contrasena?: string;
+}
+
+// --- Offensive Discovery Interfaces ---
+
+export interface DescubrimientoResultado {
+  objetivo?: { url: string; accesible: boolean };
+  interfaz?: { tipo: string; selector_entrada: string; selector_envio: string; metodo_envio: string };
+  canal?: { protocolo: string; transporte: string; url: string; metodo: string; content_type: string; entrada: any; respuesta: any };
+  autenticacion?: { requerida: boolean; tipos: string[]; cookies: string[]; headers: string[] };
+  confianza?: number;
+  marcador_utilizado?: string;
+  observaciones_registradas?: number;
+}
+
+export interface DescubrimientoItem {
+  id: string;
+  target_url: string;
+  status: DescubrimientoStatus;
+  marcador?: string;
+  resultado?: DescubrimientoResultado;
+  error_message?: string | null;
+  started_at?: string | null;
+  finished_at?: string | null;
+  created_at: string;
+}
+
+// --- Domain Models ---
 
 export interface TestBattery {
   id: string;
@@ -68,3 +117,20 @@ export interface ExecutiveReport {
   status: ReportStatus;
   fileUri: string | null;
 }
+
+// --- Store Interface ---
+
+export interface IAuditStore {
+  isReady(): boolean;
+  getAudits(): Audit[];
+  getAuditById(id: string): Audit | undefined;
+  getFindings(auditId: string): Finding[];
+  getFindingById(findingId: string): Finding | undefined;
+  createAudit(targetUrl: string, name?: string): Audit;
+  addFinding(finding: Finding): void;
+  updateAudit(audit: Audit): void;
+  deleteAudit(auditId: string): void;
+  clearStore(): Promise<void>;
+}
+
+

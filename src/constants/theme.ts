@@ -1,6 +1,5 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Design system tokens, color scales, typography and spacing constants.
  */
 
 import '@/global.css';
@@ -9,23 +8,15 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    // Brand palette shared with the web console (parcial_front/src/index.css
-    // @theme block) + Tailwind's slate scale, which the web app already uses
-    // for its own neutrals (bg-slate-50, text-slate-900, text-slate-500...).
     text: '#0F172A', // slate-900
     background: '#F8FAFC', // --color-app-bg
     backgroundElement: '#F1F5F9', // slate-100
     backgroundSelected: '#E2E8F0', // slate-200
     textSecondary: '#64748B', // slate-500
     tint: '#1E40AF', // --color-primary
-    // Text/icon color to use ON TOP of a `tint`-filled surface (e.g. a
-    // primary button). Kept separate from `tint` because light/dark use
-    // opposite polarities here — see dark.onTint below.
     onTint: '#FFFFFF',
     danger: '#D0342C',
     success: '#2E7D32',
-    // Severity badges (see severity-data-display skill) — color + icon + text
-    // together, never color alone.
     severityCritical: '#B3261E',
     severityHigh: '#C4560C',
     severityMedium: '#A66A00',
@@ -33,23 +24,14 @@ export const Colors = {
   },
   dark: {
     text: '#ffffff',
-    // Pure black on purpose: OLED screens draw ~zero power per black pixel.
-    // Do not "soften" this to a dark gray for aesthetics — see
-    // severity-data-display skill, section 5.
     background: '#000000',
-    backgroundElement: '#1E293B', // slate-800, same hex as web's --color-sidebar-hover
+    backgroundElement: '#1E293B', // slate-800
     backgroundSelected: '#1E3A8A', // --color-sidebar-active
     textSecondary: '#94A3B8', // slate-400
     tint: '#38BDF8', // --color-accent
-    // Accent is light, so text/icons on top of it need a dark foreground —
-    // reusing the web's --color-sidebar navy reads as "on-brand" rather than
-    // a generic black.
     onTint: '#0F172A',
     danger: '#FF6B60',
     success: '#7BC67E',
-    // Deliberately lighter/less saturated than the light-mode values above —
-    // a saturated "red-500"-equivalent on a black background is harder to
-    // read in bright/outdoor conditions. Never reuse the light-mode hex here.
     severityCritical: '#F2867B',
     severityHigh: '#F5A968',
     severityMedium: '#E8C468',
@@ -59,28 +41,44 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
+export const OverlayColors = {
+  modalBackdrop: 'rgba(0,0,0,0.6)',
+  scannerHeader: 'rgba(0,0,0,0.85)',
+  scannerUnfocused: 'rgba(0,0,0,0.55)',
+  scannerGlass: 'rgba(255,255,255,0.2)',
+  instructionBanner: 'rgba(0,0,0,0.6)',
+  headerBorder: '#33415533',
+  linkBlue: '#3B82F6',
+  white: '#FFFFFF',
+} as const;
+
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
+    regular: 'system-ui',
+    semiBold: 'system-ui',
+    bold: 'system-ui',
     mono: 'ui-monospace',
+    sans: 'system-ui',
+    serif: 'ui-serif',
+    rounded: 'ui-rounded',
   },
   default: {
+    regular: 'normal',
+    semiBold: 'normal',
+    bold: 'normal',
+    mono: 'monospace',
     sans: 'normal',
     serif: 'serif',
     rounded: 'normal',
-    mono: 'monospace',
   },
   web: {
+    regular: 'var(--font-display)',
+    semiBold: 'var(--font-display)',
+    bold: 'var(--font-display)',
+    mono: 'var(--font-mono)',
     sans: 'var(--font-display)',
     serif: 'var(--font-serif)',
     rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
   },
 });
 
@@ -92,6 +90,60 @@ export const Spacing = {
   four: 24,
   five: 32,
   six: 64,
+} as const;
+
+export const BorderRadius = {
+  xs: 4,
+  sm: 6,
+  md: 8,
+  lg: 10,
+  xl: 12,
+  full: 9999,
+} as const;
+
+export const Typography = {
+  xs: 10,
+  sm: 12,
+  md: 14,
+  lg: 16,
+  xl: 18,
+  xxl: 24,
+  title: 32,
+  subtitle: 20,
+} as const;
+
+export const TypographyLineHeight = {
+  xs: 14,
+  sm: 16,
+  md: 20,
+  lg: 24,
+  xl: 28,
+  xxl: 32,
+  title: 32,
+  subtitle: 24,
+  link: 30,
+} as const;
+
+export const ComponentLayout = {
+  QR_FRAME_SIZE: 260,
+  MODAL_MAX_WIDTH: 480,
+  PERMISSION_CARD_MAX_WIDTH: 360,
+  BUTTON_MIN_WIDTH: 140,
+  PROGRESS_BAR_HEIGHT: 8,
+  PROGRESS_LABEL_MIN_WIDTH: 44,
+} as const;
+
+export const AnimationTokens = {
+  SPLASH_DURATION_MS: 600,
+  WEB_DURATION_MS: 300,
+  GLOW_DURATION_MS: 240000,
+  INITIAL_SCALE_DIVISOR: 90,
+  ICON_SIZE: 128,
+  GLOW_SIZE: 201,
+  LOGO_WIDTH: 76,
+  LOGO_HEIGHT: 71,
+  LOGO_BORDER_RADIUS: 40,
+  WEB_TOP_OFFSET: 202,
 } as const;
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
