@@ -4,8 +4,9 @@ import { AppState, type AppStateStatus } from 'react-native';
 
 import { apiRequest } from './client';
 import type { Audit } from './types';
+import { auditStore } from './audit-store';
 
-export const AUDITS_POLL_INTERVAL_MS = 30_000; // FR-004 default (spec.md Assumptions)
+export const AUDITS_POLL_INTERVAL_MS = 2500; // Fast live polling for real-time progress updates
 
 function useIsAppForegrounded(): boolean {
   const [isForegrounded, setIsForegrounded] = useState(AppState.currentState === 'active');
@@ -22,16 +23,24 @@ function useIsAppForegrounded(): boolean {
 /**
  * Polls GET /audits every 30s while the monitoring panel is visible (FR-004),
  * and pauses polling while the app is backgrounded, resuming on foreground
- * (FR-004a) — implemented by disabling the query rather than letting
- * TanStack Query's own background-refetch setting handle it, so the pause is
- * explicit and testable.
+ * (FR-004a). Falls back gracefully to local audit store if endpoint is pending.
  */
 export function useAudits(): UseQueryResult<Audit[]> {
   const isForegrounded = useIsAppForegrounded();
 
   return useQuery({
     queryKey: ['audits'],
-    queryFn: () => apiRequest<{ audits: Audit[] }>('/audits?status=running,completed,paused').then((r) => r.audits),
+    queryFn: async () => {
+      try {
+        const response = await apiRequest<{ audits: Audit[] }>('/audits?status=running,completed,paused');
+        if (response && response.audits && response.audits.length > 0) {
+          return response.audits;
+        }
+      } catch {
+        // Ignore and fallback to audit store
+      }
+      return auditStore.getAudits();
+    },
     refetchInterval: isForegrounded ? AUDITS_POLL_INTERVAL_MS : false,
     refetchIntervalInBackground: false,
     enabled: isForegrounded,

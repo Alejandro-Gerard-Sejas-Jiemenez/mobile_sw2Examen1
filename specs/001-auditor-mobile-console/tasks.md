@@ -159,21 +159,23 @@ no-collapse on rapid succession).
 
 ### Implementation for User Story 3
 
-- [ ] T023 [P] [US3] Implement `src/services/notifications/register-push-token.ts`: request
+- [X] T023 [P] [US3] Implement `src/services/notifications/register-push-token.ts`: request
       notification permission, obtain the Expo push token, and call
       `POST /devices/push-token` (contracts/notifications.md) — this call MUST only be made when
       `AuditorSession` (T006) has a valid access token (Constitution Principle IV)
-- [ ] T024 [US3] Call `DELETE /devices/push-token` (contracts/notifications.md) from
+- [X] T024 [US3] Call `DELETE /devices/push-token` (contracts/notifications.md) from
       `src/services/auth/use-logout.ts` (T016) before clearing the session, disassociating the
       device's push token from the account
-- [ ] T025 [US3] Implement `src/services/notifications/handle-notification-response.ts`: on a
+- [X] T025 [US3] Implement `src/services/notifications/handle-notification-response.ts`: on a
       notification tap, validate `data.route` against the fixed whitelist in
       contracts/notifications.md (`finding-detail`, `audit-detail`, `alerts-list`) — any other
       value, or a missing required id, MUST navigate to `alerts-list` instead
-- [ ] T026 [US3] Build the alerts list screen in `src/app/(tabs)/alerts.tsx`, listing delivered
+- [X] T026 [US3] Build the alerts list screen in `src/app/(tabs)/alerts.tsx`, listing delivered
       `Alert` records (data-model.md) with `severityLabel` and `readState`, each opening its
-      linked finding
-- [ ] T027 [US3] Register the T025 handler and a foreground-notification display in
+      linked finding — **note**: tap-through to the linked finding is a no-op until US4
+      (T030/T031) builds the finding-detail screen; see the interim-gap comment in
+      `handle-notification-response.ts`
+- [X] T027 [US3] Register the T025 handler and a foreground-notification display in
       `src/app/_layout.tsx` using `expo-notifications`' response/received listeners
 
 **Checkpoint**: Stories 1–3 functional independently (quickstart.md Scenarios 1–3).
@@ -189,20 +191,20 @@ reflected).
 
 ### Implementation for User Story 4
 
-- [ ] T028 [P] [US4] Implement `src/services/api/use-findings.ts`: TanStack Query hook for
+- [X] T028 [P] [US4] Implement `src/services/api/use-findings.ts`: TanStack Query hook for
       `GET /audits/{auditId}/findings` (contracts/monitoring.md)
-- [ ] T029 [P] [US4] Implement `src/services/api/use-finding-detail.ts`: TanStack Query hook for
+- [X] T029 [P] [US4] Implement `src/services/api/use-finding-detail.ts`: TanStack Query hook for
       `GET /findings/{findingId}` (contracts/monitoring.md), surfacing a distinct
       not-found/forbidden state on 403/404
-- [ ] T030 [US4] Build the findings list screen at `src/app/(tabs)/audits/[auditId]/findings.tsx`
+- [X] T030 [US4] Build the findings list screen at `src/app/(tabs)/audits/[auditId]/findings.tsx`
       using T028, showing `type`/`severity`/`summary` per finding and visually distinguishing
       `confirmationState: "confirmed"` from `"preliminary"` (FR-010)
-- [ ] T031 [US4] Build the finding detail screen at `src/app/(tabs)/findings/[findingId].tsx`
+- [X] T031 [US4] Build the finding detail screen at `src/app/(tabs)/findings/[findingId].tsx`
       using T029, rendering `evidence` and `impactParameters` (data-model.md)
-- [ ] T032 [US4] In `src/app/(tabs)/findings/[findingId].tsx`, show an explicit "no longer
+- [X] T032 [US4] In `src/app/(tabs)/findings/[findingId].tsx`, show an explicit "no longer
       available" message on the T029 hook's 403/404 state instead of stale cached content (spec
       Edge Cases)
-- [ ] T033 [US4] Ensure `use-finding-detail.ts` (T029) refetches on screen focus so a
+- [X] T033 [US4] Ensure `use-finding-detail.ts` (T029) refetches on screen focus so a
       `reclassifiedAt`/severity change made on the backend is reflected next time the auditor
       opens that finding (spec Edge Cases — reclassification)
 
@@ -220,20 +222,24 @@ state, share sheet).
 
 ### Implementation for User Story 5
 
-- [ ] T034 [P] [US5] Implement `src/services/api/use-report-preview.ts`: query hook for
+- [X] T034 [P] [US5] Implement `src/services/api/use-report-preview.ts`: query hook for
       `GET /audits/{auditId}/report/preview?format=pdf|markdown` (contracts/monitoring.md)
-- [ ] T035 [US5] Build the report screen at `src/app/(tabs)/audits/[auditId]/report.tsx` with a
+- [X] T035 [US5] Build the report screen at `src/app/(tabs)/audits/[auditId]/report.tsx` with a
       PDF/Markdown format toggle, rendering the T034 preview
-- [ ] T036 [US5] Implement `src/services/api/use-generate-report.ts`: calls
+- [X] T036 [US5] Implement `src/services/api/use-generate-report.ts`: calls
       `POST /audits/{auditId}/report` then polls `GET /reports/{reportId}` until
       `status: "ready"` (or `"failed"`), exposing a `compiling` state to the UI (spec Edge Cases —
       large finding sets)
-- [ ] T037 [US5] Implement `src/services/reports/generate-pdf.ts` using `expo-print` to render the
+- [X] T037 [US5] Implement `src/services/reports/generate-pdf.ts` using `expo-print` to render the
       report HTML (from the ready report's data) into a local PDF file
-- [ ] T038 [US5] Implement `src/services/reports/generate-markdown.ts` to produce a Markdown
+- [X] T038 [US5] Implement `src/services/reports/generate-markdown.ts` to produce a Markdown
       string/file from the same report data, for the Markdown format path
-- [ ] T039 [US5] Wire a "Share" action in `src/app/(tabs)/audits/[auditId]/report.tsx` that hands
-      the compiled file (T037 or T038 output) to `expo-sharing`
+- [X] T039 [US5] Wire a "Share" action in `src/app/(tabs)/audits/[auditId]/report.tsx` that hands
+      the compiled file (T037 or T038 output) to `expo-sharing` — **note**: the shared file is
+      built from the already-fetched preview content for the selected format rather than
+      re-fetching the report's `downloadUrl`, since the mock backend serves that URL behind the
+      same auth-required endpoint as the preview, not as an unauthenticated pre-signed link; see
+      the comment in `report.tsx`
 
 **Checkpoint**: All 5 user stories independently functional (quickstart.md Scenarios 1–5 all pass).
 
@@ -243,21 +249,33 @@ state, share sheet).
 
 **Purpose**: Security-critical unit coverage and final validation across all stories
 
-- [ ] T040 [P] Unit test the refresh mutex in `tests/unit/refresh-mutex.test.ts`: two concurrent
+- [X] T040 [P] Unit test the refresh mutex in `tests/unit/refresh-mutex.test.ts`: two concurrent
       401s trigger exactly one `/auth/refresh` call, and the second caller receives the result of
       the first (not a second, competing rotation) — covers `src/services/auth/refresh-mutex.ts`
       (T008)
-- [ ] T041 [P] Unit test the notification route whitelist in
+- [X] T041 [P] Unit test the notification route whitelist in
       `tests/unit/notification-route-whitelist.test.ts`: a payload with an unrecognized or missing
       `route` resolves to `alerts-list`, never to an arbitrary path — covers
       `src/services/notifications/handle-notification-response.ts` (T025)
-- [ ] T042 [P] Grep the codebase for `AsyncStorage` usage and confirm none of it touches
+- [X] T042 [P] Grep the codebase for `AsyncStorage` usage and confirm none of it touches
       `accessToken` or `refreshToken` (Constitution Principle I); document the check's result in
-      the PR/commit description
-- [ ] T043 Run the full `quickstart.md` validation (all 5 scenarios) against a real or mocked
-      backend implementing `contracts/`
-- [ ] T044 Run `npx tsc --noEmit` and `npx expo-doctor` and confirm both are clean, per the
-      constitution's Development Workflow section
+      the PR/commit description — **result**: zero usages in `src/`; the only match is a comment
+      in `secure-token-store.ts` explicitly forbidding it, and
+      `@react-native-async-storage/async-storage` isn't even a project dependency
+- [X] T043 Run the full `quickstart.md` validation (all 5 scenarios) against a real or mocked
+      backend implementing `contracts/` — **result**: exercised end-to-end against `mock-server/`
+      for every scenario except the on-device push-delivery half of Scenario 3 (steps 1/3/4, which
+      need a real device + EAS push credentials, not reproducible from this environment); all
+      backend-side behavior (auth/refresh/logout, audit/finding/report authorization scoping,
+      report compile→ready polling) verified via curl against the mock server
+- [X] T044 Run `npx tsc --noEmit` and `npx expo-doctor` and confirm both are clean, per the
+      constitution's Development Workflow section — both clean, aside from a pre-existing,
+      unrelated Expo SDK patch-version drift (6 packages a patch version behind; not introduced by
+      this implementation pass). Fixing this required adding `"types": ["jest"]` to
+      `tsconfig.json`: under this project's `moduleResolution: "bundler"` setting (from
+      `expo/tsconfig.base`), TypeScript was not auto-discovering `@types/jest` from
+      `node_modules/@types` the way it would under classic `node` resolution, so `describe`/`it`/
+      `expect`/`jest` were unresolved in any test file until declared explicitly
 
 ---
 

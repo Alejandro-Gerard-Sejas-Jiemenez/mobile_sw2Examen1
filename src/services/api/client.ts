@@ -56,13 +56,13 @@ async function rawRequest(path: string, options: ApiRequestOptions): Promise<Res
 }
 
 /**
- * Authenticated request helper. On a 401, refreshes the session (via the
+ * Shared authenticated-request core. On a 401, refreshes the session (via the
  * shared refresh mutex) and retries the original request exactly once
- * (Constitution Principle I). Errors surfaced to callers are sanitized to a
- * status code + generic message — never the raw backend response body
- * (Constitution Principle III).
+ * (Constitution Principle I). Throws a sanitized `ApiError` (status + generic
+ * message, never the raw backend response body — Constitution Principle III)
+ * for any non-OK response.
  */
-export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
+async function authenticatedFetch(path: string, options: ApiRequestOptions): Promise<Response> {
   let response = await rawRequest(path, options);
 
   if (response.status === 401 && !options.skipAuth) {
@@ -77,9 +77,27 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     throw new ApiError(response.status, `Request to ${path} failed with status ${response.status}`);
   }
 
+  return response;
+}
+
+/** JSON-decoding request helper — the default for every endpoint except the raw HTML/Markdown
+ *  report preview (see `apiRequestText`). */
+export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
+  const response = await authenticatedFetch(path, options);
+
   if (response.status === 204) {
     return undefined as T;
   }
 
   return (await response.json()) as T;
+}
+
+/**
+ * Same auth/refresh/retry behavior as `apiRequest`, but decodes the body as text instead of JSON —
+ * for the one endpoint that returns a raw body (the report preview, contracts/monitoring.md:
+ * HTML for `format=pdf`, a plain Markdown string for `format=markdown`).
+ */
+export async function apiRequestText(path: string, options: ApiRequestOptions = {}): Promise<string> {
+  const response = await authenticatedFetch(path, options);
+  return response.text();
 }

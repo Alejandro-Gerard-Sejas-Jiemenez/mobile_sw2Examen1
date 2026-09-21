@@ -1,12 +1,22 @@
 <!--
 Sync Impact Report
-- Version change: [TEMPLATE] → 1.0.0 (initial ratification)
-- Modified principles: n/a (first draft, all 5 slots newly authored)
-- Added sections: Core Principles (5), Security & Technical Constraints, Development Workflow, Governance
+- Version change: 1.0.0 → 1.1.0
+- Modified principles:
+  - II. Mobile Is a Consult-Only Node (NON-NEGOTIABLE) — added a bounded exception for on-device
+    report authoring (Story 5), distinguishing "narrative formatting of already-classified data"
+    from the still-forbidden "AI semantic analysis of targets."
+  - V. Modular Separation From the Platform — added an explicit rule for external security-tooling
+    services (e.g. a separate AI-channel-discovery/scanning backend): the mobile client MUST NOT
+    call such a service directly; it must be re-exposed through the documented contract by the
+    platform backend, or not consumed at all.
+- Added sections: none (both changes are additive clarifications within existing principles)
 - Removed sections: none
-- Templates requiring follow-up: none outstanding — plan/spec/tasks templates consume this file at
-  runtime and do not embed a copy that needs manual sync.
-- Deferred TODOs: none. RATIFICATION_DATE set to the date this constitution was authored.
+- Explicitly NOT changed: the "Security & Technical Constraints" local-storage rule already fully
+  covers on-device caching/persistence (encrypted-or-ephemeral only) — no separate local relational
+  database is permitted for audit/security data under the existing text, so no amendment was needed
+  for that question.
+- Templates requiring follow-up: none outstanding.
+- Deferred TODOs: none.
 -->
 
 # Mobile Auditor Console Constitution
@@ -39,6 +49,27 @@ processing capability to the mobile client MUST be rejected or redirected to the
 backend layers by design; collapsing that boundary on a mobile device multiplies the attack surface
 of a client that is inherently harder to harden (physical loss, OS-level compromise, less control
 over the runtime) than a server.
+
+**Bounded exception — on-device report authoring is not analysis**: generating narrative prose for
+an Executive Report (Story 5) from data the backend has already fetched and classified is
+formatting, not analysis, and MAY use an on-device language model, subject to every one of the
+following:
+- The on-device model receives only already-classified, already-fetched fields the app already
+  displays elsewhere over an authenticated request (e.g. `Finding.summary`, `severity`,
+  `confirmationState`, `impactParameters`) — never raw scan traffic, unclassified data, or a live
+  connection to a target application.
+- The on-device model MUST NOT write back `severity`, `confirmationState`, or any other field the
+  backend treats as authoritative. Its output is narrative text placed alongside the original
+  structured data, never a replacement, reclassification, or "correction" of it.
+- The on-device model MUST NOT be given network access to a target application, nor any tool-
+  calling capability to trigger a request against one — it is a local text-formatting step over
+  already-fetched data, not an agent.
+- Fetching the underlying Finding/Audit data still goes through an authenticated backend request at
+  export time (Security & Technical Constraints, below); the on-device model participates only
+  after that fetch, never in place of it.
+
+Any feature request that would give the on-device model target data outside this bounded exception
+falls back to the general rule above and MUST be rejected or redirected to the backend.
 
 ### III. Backend-Enforced Authorization, Client-Verified Transport
 Every request to the backend MUST use HTTPS. No API key, bearer token, or secret MUST be
@@ -75,6 +106,18 @@ through that contract, not by the mobile app inferring or reverse-engineering ba
 keeps the mobile client replaceable/reviewable in isolation, which matters for an app whose only
 job is to safely surface security-sensitive data.
 
+**External security-tooling services**: the platform may run separate backend-internal services for
+specific testing capabilities (e.g. an AI-channel-discovery or scanning microservice). These are
+backend infrastructure, not part of the mobile client's documented API contract. The mobile app
+MUST NOT call such a service directly under any circumstance, and especially not one exposed
+without its own authentication — doing so both violates this principle and Principle III's
+backend-enforced-authorization requirement. If such a service's results should be visible to
+auditors, the platform backend MUST ingest and re-expose them through the existing contract (e.g.
+as `Finding` records via `GET /audits/{auditId}/findings`); until that integration exists, its data
+is simply out of scope for the mobile app. An unauthenticated backend service reachable from the
+public internet is itself a security finding to raise with the team, not a shortcut to consume from
+the client.
+
 ## Security & Technical Constraints
 
 - Stack: Expo + TypeScript + Expo Router (`src/app`), as already scaffolded.
@@ -105,4 +148,4 @@ clarifications/wording), and MUST update `Last Amended`. Any plan or task that c
 Core Principle MUST either be revised or justified with an explicit, recorded exception before
 `/speckit-implement` proceeds — silent deviation is not permitted.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-12 | **Last Amended**: 2026-09-12
+**Version**: 1.1.0 | **Ratified**: 2026-09-12 | **Last Amended**: 2026-09-19

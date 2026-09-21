@@ -69,9 +69,9 @@ export default function SignInScreen() {
               { backgroundColor: theme.tint, opacity: canSubmit && !pressed ? 1 : 0.6 },
             ]}>
             {isSubmitting ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={theme.onTint} />
             ) : (
-              <ThemedText type="smallBold" style={styles.submitLabel}>
+              <ThemedText type="smallBold" style={{ color: theme.onTint }}>
                 Sign in
               </ThemedText>
             )}
@@ -126,8 +126,5 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  submitLabel: {
-    color: '#fff',
   },
 });

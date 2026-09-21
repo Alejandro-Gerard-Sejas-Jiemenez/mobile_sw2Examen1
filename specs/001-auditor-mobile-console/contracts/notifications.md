@@ -46,3 +46,28 @@ registration MUST require an authenticated session.
 
 Any payload whose `route` is absent, unrecognized, or missing its required id field resolves to
 `alerts-list` instead of throwing or silently doing nothing.
+
+## GET /alerts
+
+**Auth**: required (`Authorization: Bearer <accessToken>`).
+
+**Response 200**:
+```json
+{
+  "alerts": [
+    {
+      "id": "string",
+      "findingId": "string",
+      "severityLabel": "Critical",
+      "deliveredAt": "2026-09-12T18:00:00Z",
+      "readState": "unread"
+    }
+  ]
+}
+```
+
+Backs `src/app/(tabs)/alerts.tsx` (tasks.md T026): the delivered-alerts list an auditor sees when
+opening the Alerts tab, independent of whether the underlying push notification was received on
+this device. Authorization (which alerts are visible) is enforced server-side the same way as
+`GET /audits` — an alert whose finding belongs to an audit the auditor cannot access MUST NOT
+appear in this list, matching the push-delivery rule above.

@@ -9,12 +9,19 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-    tint: '#208AEF',
+    // Brand palette shared with the web console (parcial_front/src/index.css
+    // @theme block) + Tailwind's slate scale, which the web app already uses
+    // for its own neutrals (bg-slate-50, text-slate-900, text-slate-500...).
+    text: '#0F172A', // slate-900
+    background: '#F8FAFC', // --color-app-bg
+    backgroundElement: '#F1F5F9', // slate-100
+    backgroundSelected: '#E2E8F0', // slate-200
+    textSecondary: '#64748B', // slate-500
+    tint: '#1E40AF', // --color-primary
+    // Text/icon color to use ON TOP of a `tint`-filled surface (e.g. a
+    // primary button). Kept separate from `tint` because light/dark use
+    // opposite polarities here — see dark.onTint below.
+    onTint: '#FFFFFF',
     danger: '#D0342C',
     success: '#2E7D32',
     // Severity badges (see severity-data-display skill) — color + icon + text
@@ -30,10 +37,14 @@ export const Colors = {
     // Do not "soften" this to a dark gray for aesthetics — see
     // severity-data-display skill, section 5.
     background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-    tint: '#3C9FFE',
+    backgroundElement: '#1E293B', // slate-800, same hex as web's --color-sidebar-hover
+    backgroundSelected: '#1E3A8A', // --color-sidebar-active
+    textSecondary: '#94A3B8', // slate-400
+    tint: '#38BDF8', // --color-accent
+    // Accent is light, so text/icons on top of it need a dark foreground —
+    // reusing the web's --color-sidebar navy reads as "on-brand" rather than
+    // a generic black.
+    onTint: '#0F172A',
     danger: '#FF6B60',
     success: '#7BC67E',
     // Deliberately lighter/less saturated than the light-mode values above —

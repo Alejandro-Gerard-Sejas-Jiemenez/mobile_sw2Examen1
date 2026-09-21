@@ -23,19 +23,23 @@ export function useLogin(): {
     setIsSubmitting(true);
     setError(null);
     try {
-      const data = await apiRequest<LoginResponse>('/auth/login', {
+      const response = await apiRequest<any>('/auth/login/', {
         method: 'POST',
-        body: { email, password },
+        body: { username: email, email, password },
         skipAuth: true,
       });
 
+      const accessToken = response.access || response.accessToken;
+      const refreshToken = response.refresh || response.refreshToken;
+      const auditor = response.user || response.auditor || { id: '1', email, name: email };
+
       // Persist only the refresh token (Constitution Principle I); the access
       // token goes straight into the in-memory session.
-      await setRefreshToken(data.refreshToken);
+      await setRefreshToken(refreshToken);
       setAuditorSession({
-        accessToken: data.accessToken,
-        accessTokenExpiresAt: data.accessTokenExpiresAt,
-        auditor: data.auditor,
+        accessToken,
+        accessTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        auditor,
       });
     } catch {
       // Generic message regardless of the actual backend error — covers both

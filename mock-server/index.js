@@ -69,6 +69,7 @@ function userFor(req) {
 
 app.post('/auth/login', (req, res) => {
   const { email, password } = req.body || {};
+  console.log(`[mock-server][debug] login attempt email=${JSON.stringify(email)} password=${JSON.stringify(password)}`);
   const user = users.find((u) => u.email === email && u.password === password);
   if (!user) {
     return res.status(401).json({ error: 'invalid_credentials' });
@@ -196,6 +197,15 @@ app.post('/devices/push-token', requireAuth, (req, res) => {
 app.delete('/devices/push-token', requireAuth, (req, res) => {
   pushTokensByUser.delete(req.userId);
   res.status(204).end();
+});
+
+app.get('/alerts', requireAuth, (req, res) => {
+  const user = userFor(req);
+  const visible = Object.values(alerts).filter((alert) => {
+    const finding = findings[alert.findingId];
+    return finding && user.auditIds.includes(finding.auditId);
+  });
+  res.json({ alerts: visible });
 });
 
 // ---- Simulated "live" progress on Audit Alpha's running test battery ----
