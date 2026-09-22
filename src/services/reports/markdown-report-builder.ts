@@ -54,12 +54,21 @@ export function buildMarkdownReport({
   isAiLocalActive,
   tone = 'executive',
   auditorCustomDirectives,
+  narrativeOverride,
 }: SynthesizeOptions): string {
   const diagnosis: DynamicDiagnosis = calculateRiskAssessment(
     findings,
     tone,
     auditorCustomDirectives,
     audit.name
+  );
+  const threatSummary = narrativeOverride || diagnosis.threatSummary;
+
+  console.log(
+    `[markdown-report-builder] 📝 buildMarkdownReport → audit="${audit.name}" tone=${tone}` +
+      ` riskLevel=${diagnosis.overallRiskLevel} score=${diagnosis.riskScore}` +
+      ` findings=${findings.length} isAiLocalActive=${isAiLocalActive}` +
+      ` narrativeOverride=${narrativeOverride ? `SÍ (${narrativeOverride.length} chars)` : 'NO → heurístico'}`
   );
   const criticals = findings.filter((f) => f.severity === 'critical').length;
   const highs = findings.filter((f) => f.severity === 'high').length;
@@ -92,7 +101,7 @@ export function buildMarkdownReport({
     ``,
     `## 1. ${diagnosis.toneHeading}`,
     `> **Evaluación del Modelo Local & Vector RAG:**  `,
-    `> ${diagnosis.threatSummary.replace(/\n/g, '\n> ')}`,
+    `> ${threatSummary.replace(/\n/g, '\n> ')}`,
     ``,
     `### Métricas de Cobertura y Hallazgos:`,
     `- **Peticiones Ofensivas Enviadas:** \`${audit.metrics.requestsSent}\` requests`,

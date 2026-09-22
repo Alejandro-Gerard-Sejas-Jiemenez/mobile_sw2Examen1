@@ -14,6 +14,7 @@ export const STORAGE_FILENAMES = {
   AI_PERSISTENT_MEMORY: 'ai_persistent_memory.json',
   AUDITS_STORE: 'audits_persistent_store.json',
   MODELS_DIRECTORY: 'models/',
+  VOICE_RECORDINGS_DIRECTORY: 'voice-recordings/',
 } as const;
 
 export const STORAGE_KEYS = {

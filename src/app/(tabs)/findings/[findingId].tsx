@@ -1,15 +1,16 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SeverityBadge, ThemedText, ThemedView } from '@/components';
+import { useSafeBack } from '@/hooks/use-safe-back';
 import { useFindingDetail } from '@/services/api';
 import { findingDetailStyles } from '@/styles';
 
 export default function FindingDetailScreen() {
   const { findingId } = useLocalSearchParams<{ findingId: string }>();
   const resolvedFindingId = findingId ?? '';
-  const router = useRouter();
+  const handleBack = useSafeBack('/(tabs)');
   const { data: finding, isLoading, isUnavailable, isError } = useFindingDetail(resolvedFindingId);
 
   return (
@@ -19,7 +20,7 @@ export default function FindingDetailScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Volver"
-            onPress={() => router.back()}
+            onPress={handleBack}
             style={({ pressed }) => [findingDetailStyles.backButton, { opacity: pressed ? 0.6 : 1 }]}>
             <ThemedText type="smallBold">Volver</ThemedText>
           </Pressable>

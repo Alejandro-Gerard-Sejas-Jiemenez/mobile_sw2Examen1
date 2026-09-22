@@ -54,17 +54,6 @@ export const FINDING_CONFIRMATION_STATES = {
   PRELIMINARY: 'preliminary',
 } as const;
 
-export const SEVERITY_GLYPHS: Record<
-  (typeof FINDING_SEVERITIES)[keyof typeof FINDING_SEVERITIES] | 'unknown',
-  string
-> = {
-  [FINDING_SEVERITIES.CRITICAL]: '◆',
-  [FINDING_SEVERITIES.HIGH]: '▲',
-  [FINDING_SEVERITIES.MEDIUM]: '●',
-  [FINDING_SEVERITIES.LOW]: '■',
-  unknown: '•',
-};
-
 export const SEVERITY_COLOR_TOKENS: Record<
   (typeof FINDING_SEVERITIES)[keyof typeof FINDING_SEVERITIES] | 'unknown',
   ThemeColor

@@ -1,7 +1,6 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
-
-let Notifications: any = null;
+import * as Notifications from 'expo-notifications';
 
 import { apiRequest } from '../api/client';
 import { getAuditorSession } from '../auth/session-context';
@@ -25,13 +24,6 @@ import type { PushTokenRegistrationPayload } from './types';
  */
 export async function registerPushToken(): Promise<void> {
   if (!getAuditorSession()) {
-    return;
-  }
-  
-  if (!Notifications) {
-    if (__DEV__) {
-      console.warn('[push] Push token registration skipped: expo-notifications unavailable in Expo Go.');
-    }
     return;
   }
 

@@ -10,3 +10,4 @@ export * from './html-report-builder';
 export * from './html-report.styles';
 export * from './generate-markdown';
 export * from './generate-pdf';
+export * from './reports-db';

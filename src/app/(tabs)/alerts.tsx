@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { FlatList, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { SeverityBadge, ThemedText, ThemedView } from '@/components';
+import { ScreenHeader, SeverityBadge, ThemedText, ThemedView } from '@/components';
 import { useTheme } from '@/hooks/use-theme';
 import { useAlerts, type Alert } from '@/services/api';
 import { alertsStyles } from '@/styles';
@@ -11,14 +11,24 @@ function AlertRow({ alert }: { alert: Alert }) {
   const theme = useTheme();
   const router = useRouter();
   const isUnread = alert.readState === 'unread';
+  const isPhaseAlert = alert.kind === 'phase';
+  const isReportAlert = alert.kind === 'report';
+
+  const handlePress = () => {
+    if (isReportAlert && alert.auditId) {
+      router.push({ pathname: '/(tabs)/audits/[auditId]/report', params: { auditId: alert.auditId } });
+    } else if (isPhaseAlert && alert.auditId) {
+      router.push({ pathname: '/(tabs)/audits/[auditId]/findings', params: { auditId: alert.auditId } });
+    } else {
+      router.push({ pathname: '/(tabs)/findings/[findingId]', params: { findingId: alert.findingId } });
+    }
+  };
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Alerta de ${alert.severityLabel} para el hallazgo ${alert.findingId}`}
-      onPress={() =>
-        router.push({ pathname: '/(tabs)/findings/[findingId]', params: { findingId: alert.findingId } })
-      }
+      accessibilityLabel={alert.message || `Alerta de ${alert.severityLabel} para el hallazgo ${alert.findingId}`}
+      onPress={handlePress}
       style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
       <ThemedView type="backgroundElement" style={alertsStyles.alertCard}>
         {isUnread ? <View style={[alertsStyles.unreadDot, { backgroundColor: theme.tint }]} /> : null}
@@ -30,7 +40,7 @@ function AlertRow({ alert }: { alert: Alert }) {
             </ThemedText>
           </View>
           <ThemedText type="small" themeColor="textSecondary">
-            Finding {alert.findingId}
+            {alert.message || `Finding ${alert.findingId}`}
           </ThemedText>
         </View>
       </ThemedView>
@@ -44,11 +54,7 @@ export default function AlertsScreen() {
   return (
     <ThemedView style={alertsStyles.container}>
       <SafeAreaView style={alertsStyles.safeArea} edges={['top']}>
-        <ThemedView style={alertsStyles.header}>
-          <ThemedText type="title" style={alertsStyles.headerTitle}>
-            ALERTS
-          </ThemedText>
-        </ThemedView>
+        <ScreenHeader title="ALERTAS" />
 
         {isLoading ? (
           <ThemedText type="small" themeColor="textSecondary" style={alertsStyles.centerMessage}>

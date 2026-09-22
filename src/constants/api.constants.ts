@@ -26,6 +26,10 @@ export const API_POLL_INTERVALS_MS = {
   DEFAULT_POLL: 30000,
 } as const;
 
+/** Report generations that finish faster than this were the cheap heuristic-only
+ *  path (no on-device Llama call) — not worth a "reporte listo" notification. */
+export const REPORT_NOTIFY_THRESHOLD_MS = 5000;
+
 export const API_ENDPOINTS = {
   SOFTWARE: '/api/software/',
   SOFTWARE_DIRECT: '/software/',
@@ -35,7 +39,6 @@ export const API_ENDPOINTS = {
   ALERTS: '/alerts',
   TOKEN: '/api/token/',
   TOKEN_REFRESH: '/api/token/refresh/',
-  DESCUBRIMIENTOS: '/api/descubrimientos/',
   AUTH_LOGIN: '/auth/login/',
   AUTH_LOGOUT: '/auth/logout',
   AUTH_REFRESH: '/auth/refresh',
@@ -44,6 +47,20 @@ export const API_ENDPOINTS = {
   findingDetail: (findingId: string) => `/findings/${findingId}`,
   reportPreview: (auditId: string, format: string, tone: string) =>
     `/audits/${auditId}/report/preview?format=${format}&tone=${tone}`,
+} as const;
+
+/**
+ * Endpoints on the INJECTION backend (backend_genvulnai), relative to
+ * EXPO_PUBLIC_INJECTION_API_URL (which already ends in `/api`). Reached only
+ * through `injectionRequest` (no auth), never the core `apiRequest`.
+ */
+export const INJECTION_ENDPOINTS = {
+  DESCUBRIMIENTOS: '/descubrimientos/',
+  descubrimientoDetail: (scanId: string) => `/descubrimientos/${scanId}/`,
+  ATAQUES: '/ataques/',
+  ataqueDetail: (sessionId: string) => `/ataques/${sessionId}/`,
+  ataqueTurnos: (sessionId: string) => `/ataques/${sessionId}/turnos/`,
+  OLLAMA_HEALTH: '/sistema/ollama/',
 } as const;
 
 export const AUTH_ROUTES = {
@@ -55,12 +72,14 @@ export const AUTH_ROUTES = {
 export const NOTIFICATION_SCREENS = {
   FINDING_DETAIL: 'finding-detail',
   AUDIT_DETAIL: 'audit-detail',
+  REPORT_READY: 'report-ready',
   ALERTS_LIST: 'alerts-list',
 } as const;
 
 export const NOTIFICATION_ROUTES = {
   FINDING_DETAIL: '/(tabs)/findings/[findingId]',
   AUDIT_DETAIL: '/(tabs)/audits/[auditId]/findings',
+  REPORT_READY: '/(tabs)/audits/[auditId]/report',
   ALERTS_LIST: '/(tabs)/alerts',
 } as const;
 
@@ -70,6 +89,8 @@ export const QUERY_KEYS = {
   AUDITS: ['audits'] as const,
   ALERTS: ['alerts'] as const,
   DESCUBRIMIENTOS: ['descubrimientos'] as const,
+  ATAQUES: ['ataques'] as const,
+  ATTACK_TURNS: (sessionId: string) => ['ataques', sessionId, 'turnos'] as const,
   AUDIT_FINDINGS: (auditId: string) => ['audits', auditId, 'findings'] as const,
   FINDING_DETAIL: (findingId: string) => ['findings', findingId] as const,
   REPORT_PREVIEW: (
@@ -78,5 +99,8 @@ export const QUERY_KEYS = {
     tone: string,
     customPrompt: string = ''
   ) => ['audits', auditId, 'report-preview', format, tone, customPrompt] as const,
+  SAVED_REPORTS: ['saved-reports'] as const,
+  SAVED_REPORTS_FOR_AUDIT: (auditId: string) => ['saved-reports', auditId] as const,
+  SAVED_REPORT_DETAIL: (reportId: string) => ['saved-reports', 'detail', reportId] as const,
 } as const;
 

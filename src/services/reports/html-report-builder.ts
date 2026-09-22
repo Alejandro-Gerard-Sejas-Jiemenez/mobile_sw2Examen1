@@ -19,6 +19,13 @@ function getRiskBadgeColor(level: DynamicDiagnosis['overallRiskLevel']): string 
   }
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 function getSeverityColor(severity: string): string {
   switch (severity) {
     case 'critical':
@@ -103,6 +110,7 @@ export function buildHtmlReport({
   isAiLocalActive,
   tone = 'executive',
   auditorCustomDirectives,
+  narrativeOverride,
 }: SynthesizeOptions): string {
   const diagnosis = calculateRiskAssessment(
     findings,
@@ -110,6 +118,15 @@ export function buildHtmlReport({
     auditorCustomDirectives,
     audit.name
   );
+
+  console.log(
+    `[html-report-builder] 🏗️  buildHtmlReport → audit="${audit.name}" tone=${tone}` +
+      ` riskLevel=${diagnosis.overallRiskLevel} score=${diagnosis.riskScore}` +
+      ` findings=${findings.length} isAiLocalActive=${isAiLocalActive}` +
+      ` narrativeOverride=${narrativeOverride ? `SÍ (${narrativeOverride.length} chars)` : 'NO → heurístico'}`
+  );
+
+  const threatSummary = narrativeOverride ? escapeHtml(narrativeOverride) : diagnosis.threatSummary;
 
   const criticals = findings.filter((f) => f.severity === 'critical').length;
   const highs = findings.filter((f) => f.severity === 'high').length;
@@ -187,7 +204,7 @@ export function buildHtmlReport({
 
       <div class="ai-diagnosis-card">
         <h2>${diagnosis.toneHeading}</h2>
-        <p class="ai-diagnosis-text">${diagnosis.threatSummary}</p>
+        <p class="ai-diagnosis-text">${threatSummary}</p>
         <div class="compliance-note"><b>Evaluación de Cumplimiento:</b> ${diagnosis.complianceImpact}</div>
       </div>
 

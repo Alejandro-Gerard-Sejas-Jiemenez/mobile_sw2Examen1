@@ -10,6 +10,7 @@ export type NotificationScreen = (typeof NOTIFICATION_SCREENS)[keyof typeof NOTI
 export type NotificationRouteResolution =
   | { screen: 'finding-detail'; findingId: string }
   | { screen: 'audit-detail'; auditId: string }
+  | { screen: 'report-ready'; auditId: string }
   | { screen: 'alerts-list' };
 
 export interface NotificationDataPayload {

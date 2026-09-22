@@ -4,13 +4,17 @@ import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
 import * as Clipboard from 'expo-clipboard';
 import type { Audit } from '@/services/api/types';
-import { auditStore } from '@/services/api/audit-store';
+import { getAuditorSession } from '@/services/auth/session-context';
+import { resolveAuditFindings } from '@/services/api/resolve-findings';
 import { isModelDownloaded } from '@/services/ai/model-manager';
+import { generateLocalNarrative } from '@/services/ai/llama-inference';
 import {
   buildHtmlReport,
   buildMarkdownReport,
+  calculateRiskAssessment,
   generateReportMarkdown,
   generateReportPdf,
+  saveReport,
   type ReportTone,
 } from '@/services/reports/report-synthesizer';
 import { ReportError } from '@/errors/report-error';
@@ -40,7 +44,7 @@ export function useReportActions({
       selectedTone: ReportTone = tone,
       directives: string = customPrompt
     ): Promise<{ html: string; markdown: string }> => {
-      const findings = auditStore.getFindings(auditId);
+      const findings = await resolveAuditFindings(auditId);
       const aiStatus = await isModelDownloaded();
       const fallbackAudit: Audit = audit || {
         id: auditId,
@@ -52,12 +56,30 @@ export function useReportActions({
         testBatteries: [],
       };
 
+      // Deterministic score/narrative first (always succeeds, never depends on the
+      // model). If the on-device Llama model is downloaded, ask it to redraft ONLY
+      // the narrative paragraph, grounded in this already-computed score/findings —
+      // it never invents the numbers. Falls back to the template narrative above on
+      // any failure or timeout (`generateLocalNarrative` never throws).
+      const diagnosis = calculateRiskAssessment(findings, selectedTone, directives, fallbackAudit.name);
+      const narrativeOverride = aiStatus.exists
+        ? await generateLocalNarrative({
+            audit: fallbackAudit,
+            findings,
+            overallRiskLevel: diagnosis.overallRiskLevel,
+            riskScore: diagnosis.riskScore,
+            tone: selectedTone,
+            auditorDirectives: directives,
+          })
+        : null;
+
       const html = buildHtmlReport({
         audit: fallbackAudit,
         findings,
         isAiLocalActive: aiStatus.exists,
         tone: selectedTone,
         auditorCustomDirectives: directives,
+        narrativeOverride: narrativeOverride ?? undefined,
       });
 
       const markdown = buildMarkdownReport({
@@ -66,7 +88,28 @@ export function useReportActions({
         isAiLocalActive: aiStatus.exists,
         tone: selectedTone,
         auditorCustomDirectives: directives,
+        narrativeOverride: narrativeOverride ?? undefined,
       });
+
+      // Persist a snapshot to the local reports DB so it can be browsed later
+      // (Historial de Reportes). Never let a DB failure break the actual
+      // export/share action the user asked for.
+      try {
+        const auditor = getAuditorSession()?.auditor;
+        await saveReport({
+          auditId,
+          auditName: fallbackAudit.name,
+          tone: selectedTone,
+          riskLevel: diagnosis.overallRiskLevel,
+          riskScore: diagnosis.riskScore,
+          findingsCount: findings.length,
+          contentHtml: html,
+          contentMarkdown: markdown,
+          userId: auditor?.id ?? auditor?.auditorId ?? null,
+        });
+      } catch (err) {
+        console.warn('[useReportActions] Failed to save report to local DB:', err);
+      }
 
       return { html, markdown };
     },

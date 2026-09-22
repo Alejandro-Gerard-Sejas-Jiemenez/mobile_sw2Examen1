@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { BorderRadius, BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { BorderRadius, MaxContentWidth, Spacing } from '@/constants/theme';
 
 export const monitoringStyles = StyleSheet.create({
   container: {
@@ -16,19 +16,18 @@ export const monitoringStyles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-    paddingBottom: Spacing.two,
+    paddingTop: Spacing.two,
+    paddingBottom: Spacing.one,
   },
   headerTitle: {
-    fontSize: 28,
-    lineHeight: 32,
-    letterSpacing: 0.5,
+    fontSize: 22,
+    lineHeight: 26,
+    letterSpacing: 0.4,
   },
-  signOutButton: {
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.one,
-    minHeight: 36,
-    borderRadius: BorderRadius.sm,
+  logoutBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -44,9 +43,10 @@ export const monitoringStyles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
   },
   listContent: {
-    paddingHorizontal: Spacing.four,
-    paddingBottom: BottomTabInset + Spacing.three,
-    gap: Spacing.three,
+    paddingHorizontal: Spacing.three,
+    // FAB sits at bottom: Spacing.four, is 56 tall — clear it plus a gap
+    paddingBottom: Spacing.four + 56 + Spacing.two,
+    gap: Spacing.two,
   },
   auditCard: {
     flexDirection: 'row',
@@ -58,8 +58,8 @@ export const monitoringStyles = StyleSheet.create({
   },
   auditCardContent: {
     flex: 1,
-    padding: Spacing.three,
-    gap: Spacing.two,
+    padding: Spacing.two,
+    gap: Spacing.one,
   },
   auditHeaderRow: {
     flexDirection: 'row',
@@ -72,7 +72,7 @@ export const monitoringStyles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   batteryList: {
-    gap: Spacing.two,
+    gap: Spacing.one,
   },
   batteryRow: {
     gap: Spacing.half,
@@ -101,34 +101,44 @@ export const monitoringStyles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.one,
   },
-  cardActionBtnSecondary: {
-    paddingHorizontal: Spacing.two,
-    paddingVertical: 6,
-    borderRadius: BorderRadius.sm,
-    minHeight: 36,
+  cardActionBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  cardActionBtnPrimary: {
-    paddingHorizontal: Spacing.two,
-    paddingVertical: 6,
-    borderRadius: BorderRadius.sm,
-    minHeight: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
+  cardActionText: {
+    fontSize: 12,
+  },
+  batteryDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
   },
-  newAuditHeaderButton: {
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.one,
-    borderRadius: BorderRadius.sm,
-    minHeight: 36,
-    justifyContent: 'center',
+  fab: {
+    position: 'absolute',
+    // expo-router's Tabs content area already sits above the tab bar
+    // (tabBarStyle has no position:'absolute'), so no BottomTabInset offset needed here.
+    bottom: Spacing.four,
+    right: Spacing.four,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
+    justifyContent: 'center',
+    // Android elevation
+    elevation: 6,
+    // iOS shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
   },
   emptyContainer: {
     alignItems: 'center',

@@ -12,7 +12,7 @@ export const Colors = {
     background: '#F8FAFC', // --color-app-bg
     backgroundElement: '#F1F5F9', // slate-100
     backgroundSelected: '#E2E8F0', // slate-200
-    textSecondary: '#64748B', // slate-500
+    textSecondary: '#475569', // slate-600 — #64748B failed WCAG AA (4.34:1) on backgroundElement
     tint: '#1E40AF', // --color-primary
     onTint: '#FFFFFF',
     danger: '#D0342C',

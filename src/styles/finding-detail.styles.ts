@@ -20,8 +20,8 @@ export const findingDetailStyles = StyleSheet.create({
     paddingBottom: Spacing.two,
   },
   backButton: {
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },

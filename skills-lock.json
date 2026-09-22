@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "Mobile App Design Standards": {
+      "source": "awesome-skills/mobile-app-design",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "9a64a0cc40f18a385b7200addd1357d6ab3fcf6ea10cbf25f9e327c3b633335a"
+    },
     "imagegen-frontend-mobile": {
       "source": "leonxlnx/taste-skill",
       "sourceType": "github",

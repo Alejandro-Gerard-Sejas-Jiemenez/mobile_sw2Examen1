@@ -13,13 +13,13 @@ export const alertsStyles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-    paddingBottom: Spacing.two,
+    paddingTop: Spacing.two,
+    paddingBottom: Spacing.one,
   },
   headerTitle: {
-    fontSize: 28,
-    lineHeight: 32,
-    letterSpacing: 0.5,
+    fontSize: 22,
+    lineHeight: 26,
+    letterSpacing: 0.4,
   },
   centerMessage: {
     textAlign: 'center',
@@ -27,14 +27,14 @@ export const alertsStyles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
   },
   listContent: {
-    paddingHorizontal: Spacing.four,
-    paddingBottom: BottomTabInset + Spacing.three,
-    gap: Spacing.three,
+    paddingHorizontal: Spacing.three,
+    paddingBottom: BottomTabInset + Spacing.two,
+    gap: Spacing.two,
   },
   alertCard: {
     flexDirection: 'row',
     borderRadius: BorderRadius.sm,
-    padding: Spacing.three,
+    padding: Spacing.two,
     gap: Spacing.two,
   },
   unreadDot: {

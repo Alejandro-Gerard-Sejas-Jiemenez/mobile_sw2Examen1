@@ -35,6 +35,14 @@ export function resolveNotificationRoute(
     return { screen: NOTIFICATION_SCREENS.AUDIT_DETAIL, auditId: data.auditId };
   }
 
+  if (
+    route === NOTIFICATION_SCREENS.REPORT_READY &&
+    typeof data?.auditId === 'string' &&
+    data.auditId.length > 0
+  ) {
+    return { screen: NOTIFICATION_SCREENS.REPORT_READY, auditId: data.auditId };
+  }
+
   return { screen: NOTIFICATION_SCREENS.ALERTS_LIST };
 }
 
@@ -62,6 +70,12 @@ export function navigateForNotification(
     case NOTIFICATION_SCREENS.AUDIT_DETAIL:
       router.push({
         pathname: NOTIFICATION_ROUTES.AUDIT_DETAIL,
+        params: { auditId: resolution.auditId },
+      });
+      break;
+    case NOTIFICATION_SCREENS.REPORT_READY:
+      router.push({
+        pathname: NOTIFICATION_ROUTES.REPORT_READY,
         params: { auditId: resolution.auditId },
       });
       break;

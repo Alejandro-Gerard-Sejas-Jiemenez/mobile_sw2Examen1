@@ -3,7 +3,9 @@ import { BorderRadius, Spacing, Typography } from '@/constants/theme';
 
 export const modelCardStyles = StyleSheet.create({
   container: {
-    marginVertical: Spacing.two,
+    marginVertical: Spacing.one,
+    marginHorizontal: Spacing.three,
+    padding: Spacing.two,
   },
   title: {
     marginBottom: Spacing.half,
@@ -19,7 +21,7 @@ export const modelCardStyles = StyleSheet.create({
     marginTop: Spacing.one,
   },
   footer: {
-    marginTop: Spacing.two,
+    marginTop: Spacing.one,
   },
   statusText: {
     flex: 1,

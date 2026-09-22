@@ -5,7 +5,6 @@ import { useTheme } from '@/hooks/use-theme';
 import {
   FINDING_SEVERITIES,
   SEVERITY_COLOR_TOKENS,
-  SEVERITY_GLYPHS,
 } from '@/constants/risk.constants';
 import { badgeStyles, layoutStyles } from '@/styles';
 
@@ -27,7 +26,8 @@ function normalize(label: string): NormalizedSeverity {
 }
 
 /**
- * Renders a free-form severity label as glyph + color + text badge.
+ * Renders a free-form severity label as a filled dot + color + text badge.
+ * Shape is always the same circle — only color + text distinguish severity.
  */
 export function SeverityBadge({ label }: { label: string }) {
   const theme = useTheme();
@@ -36,9 +36,7 @@ export function SeverityBadge({ label }: { label: string }) {
 
   return (
     <View style={[layoutStyles.row, layoutStyles.gap1]}>
-      <ThemedText style={[badgeStyles.severityGlyph, { color }]}>
-        {SEVERITY_GLYPHS[severity]}
-      </ThemedText>
+      <View style={[badgeStyles.severityDot, { backgroundColor: color }]} />
       <ThemedText type="smallBold" style={{ color }}>
         {label.toUpperCase()}
       </ThemedText>

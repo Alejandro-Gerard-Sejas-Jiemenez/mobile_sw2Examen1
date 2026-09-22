@@ -5,22 +5,40 @@ import { ProgressBar } from '../ui/progress-bar';
 import { ThemedText } from '../ui/themed-text';
 import { ThemedView } from '../ui/themed-view';
 import { useTheme } from '@/hooks/use-theme';
-import { useAiModelManager } from '@/hooks/use-ai-model-manager';
 import { MODEL_STATUS_LABELS } from '@/constants/ai.constants';
 import { commonStyles, layoutStyles, modelCardStyles } from '@/styles';
+import type { ModelInfo } from '@/services/ai/model-manager';
 
-export function AiModelCard() {
+export interface AiModelCardProps {
+  title: string;
+  /** Shown once the model is downloaded and ready — describes what it unlocks. */
+  readyDescription: string;
+  isDownloaded: boolean;
+  checking: boolean;
+  downloading: boolean;
+  progress: number;
+  downloadedMb: string;
+  targetModel: ModelInfo;
+  handleDownload: () => void;
+  handleDelete: () => void;
+}
+
+/** Generic card for any on-device model (Llama narrative model, Whisper voice
+ *  model, ...) — the caller owns the manager hook and passes its state down,
+ *  so this component stays presentation-only and reusable across models. */
+export function AiModelCard({
+  title,
+  readyDescription,
+  isDownloaded,
+  checking,
+  downloading,
+  progress,
+  downloadedMb,
+  targetModel,
+  handleDownload,
+  handleDelete,
+}: AiModelCardProps) {
   const theme = useTheme();
-  const {
-    isDownloaded,
-    checking,
-    downloading,
-    progress,
-    downloadedMb,
-    targetModel,
-    handleDownload,
-    handleDelete,
-  } = useAiModelManager();
 
   const badgeColor = isDownloaded
     ? theme.success
@@ -41,7 +59,7 @@ export function AiModelCard() {
       <View style={layoutStyles.rowBetweenTop}>
         <View style={layoutStyles.flex1}>
           <ThemedText type="smallBold" style={modelCardStyles.title}>
-            MODELO IA LOCAL DE REPORTES
+            {title}
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
             {targetModel.name} ({targetModel.sizeFormatted})
@@ -78,7 +96,7 @@ export function AiModelCard() {
         ) : isDownloaded ? (
           <View style={layoutStyles.rowBetween}>
             <ThemedText type="small" themeColor="success" style={modelCardStyles.statusText}>
-              Disponible para generación de reportes offline
+              {readyDescription}
             </ThemedText>
             <Pressable onPress={handleDelete} style={modelCardStyles.deleteButton}>
               <ThemedText type="small" themeColor="danger">
@@ -99,7 +117,7 @@ export function AiModelCard() {
               },
             ]}>
             <ThemedText type="smallBold" style={modelCardStyles.downloadButtonText}>
-              Descargar Modelo IA ({targetModel.sizeFormatted})
+              Descargar Modelo ({targetModel.sizeFormatted})
             </ThemedText>
           </Pressable>
         ) : null}

@@ -3,14 +3,11 @@ import { Spacing, Typography } from '@/constants/theme';
 
 export const voicePromptStyles = StyleSheet.create({
   container: {
-    marginBottom: Spacing.three,
+    marginBottom: Spacing.two,
   },
   headerTitle: {
     fontSize: Typography.sm,
     letterSpacing: 0.3,
-  },
-  modelTag: {
-    fontSize: Typography.xs + 1,
   },
   subtitle: {
     fontSize: Typography.sm,
@@ -24,7 +21,11 @@ export const voicePromptStyles = StyleSheet.create({
     maxHeight: 70,
   },
   recordButton: {
-    minWidth: 84,
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   recordButtonText: {
     color: '#FFFFFF',

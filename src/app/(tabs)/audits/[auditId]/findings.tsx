@@ -1,49 +1,23 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { FlatList, Pressable, View } from 'react-native';
+import { FlatList, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
-import { SeverityBadge, ThemedText, ThemedView } from '@/components';
+import { FindingRow, ThemedText, ThemedView } from '@/components';
 import { useTheme } from '@/hooks/use-theme';
-import { useAudits, useFindings, type Finding } from '@/services/api';
+import { useSafeBack } from '@/hooks/use-safe-back';
+import { useAudits, useFindings } from '@/services/api';
 import { auditFindingsStyles } from '@/styles';
-
-function FindingRow({ finding }: { finding: Finding }) {
-  const router = useRouter();
-  const isPreliminary = finding.confirmationState === 'preliminary';
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`Hallazgo: ${finding.summary}`}
-      onPress={() =>
-        router.push({ pathname: '/(tabs)/findings/[findingId]', params: { findingId: finding.id } })
-      }
-      style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1 }]}>
-      <ThemedView type="backgroundElement" style={auditFindingsStyles.findingCard}>
-        <View style={auditFindingsStyles.findingHeaderRow}>
-          <SeverityBadge label={finding.severity} />
-          <ThemedText
-            type="smallBold"
-            themeColor={isPreliminary ? 'textSecondary' : 'success'}>
-            {finding.confirmationState.toUpperCase()}
-          </ThemedText>
-        </View>
-        <ThemedText type="small" themeColor="textSecondary">
-          {finding.type.toUpperCase()}
-        </ThemedText>
-        <ThemedText type="default">{finding.summary}</ThemedText>
-      </ThemedView>
-    </Pressable>
-  );
-}
 
 export default function AuditFindingsScreen() {
   const { auditId } = useLocalSearchParams<{ auditId: string }>();
   const resolvedAuditId = auditId ?? '';
   const router = useRouter();
+  const handleBack = useSafeBack('/(tabs)');
   const { data: findings, isLoading, isError } = useFindings(resolvedAuditId);
   const { data: audits } = useAudits();
-  const auditName = audits?.find((audit) => audit.id === resolvedAuditId)?.name ?? resolvedAuditId;
+  const audit = audits?.find((a) => a.id === resolvedAuditId);
+  const auditName = audit?.name ?? resolvedAuditId;
 
   const theme = useTheme();
 
@@ -51,37 +25,42 @@ export default function AuditFindingsScreen() {
     <ThemedView style={auditFindingsStyles.container}>
       <SafeAreaView style={auditFindingsStyles.safeArea} edges={['top']}>
         <ThemedView style={auditFindingsStyles.header}>
-          <View style={auditFindingsStyles.headerTopRow}>
-            <View style={auditFindingsStyles.headerTitles}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Volver a Monitoreo"
-                onPress={() => router.back()}
-                style={({ pressed }) => [auditFindingsStyles.backBtn, { opacity: pressed ? 0.6 : 1 }]}>
-                <ThemedText type="smallBold" themeColor="tint">
-                  Volver a Monitoreo
-                </ThemedText>
-              </Pressable>
-              <ThemedText type="title" style={auditFindingsStyles.headerTitle} numberOfLines={1}>
-                {auditName.toUpperCase()}
-              </ThemedText>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Ver Reporte IA"
-              onPress={() =>
-                router.push({ pathname: '/(tabs)/audits/[auditId]/report', params: { auditId: resolvedAuditId } })
-              }
-              style={({ pressed }) => [
-                auditFindingsStyles.reportHeaderBtn,
-                { backgroundColor: theme.tint, opacity: pressed ? 0.7 : 1 },
-              ]}>
-              <ThemedText type="smallBold" style={{ color: theme.onTint }}>
-                Reporte IA
-              </ThemedText>
-            </Pressable>
-          </View>
+          {/* Botón volver — solo ícono chevron */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Volver a Monitoreo"
+            onPress={handleBack}
+            style={({ pressed }) => [auditFindingsStyles.backBtn, { opacity: pressed ? 0.6 : 1 }]}>
+            <Ionicons name="chevron-back" size={22} color={theme.tint} />
+          </Pressable>
+          <ThemedText type="title" style={auditFindingsStyles.headerTitle} numberOfLines={1}>
+            {auditName.toUpperCase()}
+          </ThemedText>
+
+          {/* Reporte — ícono doc */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Ver Reporte IA"
+            onPress={() =>
+              router.push({ pathname: '/(tabs)/audits/[auditId]/report', params: { auditId: resolvedAuditId } })
+            }
+            style={({ pressed }) => [
+              auditFindingsStyles.reportHeaderBtn,
+              { backgroundColor: theme.tint, opacity: pressed ? 0.7 : 1 },
+            ]}>
+            <Ionicons name="document-text" size={18} color={theme.onTint} />
+          </Pressable>
         </ThemedView>
+
+        {audit?.lastKnownAttackStatus ? (
+          <ThemedText type="small" themeColor="textSecondary" style={auditFindingsStyles.launchNotice}>
+            Fase actual: {audit.lastKnownAttackStatus} — seguimiento del ataque creado en la web.
+          </ThemedText>
+        ) : audit?.lastKnownScanStatus ? (
+          <ThemedText type="small" themeColor="textSecondary" style={auditFindingsStyles.launchNotice}>
+            Fase actual: {audit.lastKnownScanStatus} — esperando a que se lance el ataque desde la web.
+          </ThemedText>
+        ) : null}
 
         {isLoading ? (
           <ThemedText type="small" themeColor="textSecondary" style={auditFindingsStyles.centerMessage}>

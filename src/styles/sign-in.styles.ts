@@ -44,4 +44,10 @@ export const signInStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  termsLink: {
+    minHeight: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.four,
+  },
 });

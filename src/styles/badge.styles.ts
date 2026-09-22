@@ -1,10 +1,11 @@
 import { StyleSheet } from 'react-native';
-import { BorderRadius, ComponentLayout, Typography } from '@/constants/theme';
+import { BorderRadius, ComponentLayout } from '@/constants/theme';
 
 export const badgeStyles = StyleSheet.create({
-  severityGlyph: {
-    fontSize: Typography.md,
-    lineHeight: 20,
+  severityDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
   statusDotDefault: {
     width: 8,

@@ -10,6 +10,7 @@ import { Pressable, View } from 'react-native';
 
 import { ThemedText, ThemedView } from '@/components';
 import { tabsStyles } from '@/styles';
+import { useSyncRemoteAudits } from '@/services/api';
 
 export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps) {
   return (
@@ -39,6 +40,8 @@ export function CustomTabList(props: TabListProps) {
 }
 
 export default function AppTabs() {
+  useSyncRemoteAudits();
+
   return (
     <Tabs>
       <TabSlot style={{ height: '100%' }} />

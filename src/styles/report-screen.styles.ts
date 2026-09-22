@@ -14,26 +14,26 @@ export const reportScreenStyles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: OverlayColors.headerBorder,
   },
   backBtn: {
-    paddingVertical: Spacing.one,
-    paddingHorizontal: Spacing.two,
-    marginRight: Spacing.two,
-    minHeight: 36,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 16,
     letterSpacing: 0.5,
+    flex: 1,
   },
   formatToggleRow: {
     flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.two,
     gap: Spacing.two,
   },
   formatButton: {
@@ -42,36 +42,37 @@ export const reportScreenStyles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 40,
+    minHeight: 44,
   },
-  aiBadgesRow: {
+  voiceToggle: {
     flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.two,
-    gap: Spacing.two,
-  },
-  aiBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: BorderRadius.sm,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.two,
+    minHeight: 44,
   },
   previewScroll: {
     flex: 1,
     marginTop: Spacing.two,
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: Spacing.three,
   },
   previewContent: {
     paddingBottom: Spacing.four,
+    gap: Spacing.two,
   },
   centerMessage: {
     textAlign: 'center',
     marginVertical: Spacing.four,
   },
   previewCard: {
-    padding: Spacing.four,
+    padding: Spacing.three,
     borderRadius: BorderRadius.xl,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: OverlayColors.headerBorder,
+    overflow: 'hidden',
   },
   previewHint: {
     marginBottom: Spacing.two,
@@ -83,14 +84,14 @@ export const reportScreenStyles = StyleSheet.create({
     fontFamily: 'monospace',
   },
   statusLine: {
-    marginHorizontal: Spacing.four,
+    marginHorizontal: Spacing.three,
     marginBottom: Spacing.two,
     textAlign: 'center',
     fontWeight: '600',
   },
   actionsRow: {
-    paddingHorizontal: Spacing.four,
-    paddingBottom: Spacing.four,
+    paddingHorizontal: Spacing.three,
+    paddingBottom: Spacing.three,
     paddingTop: Spacing.two,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: OverlayColors.headerBorder,
@@ -99,14 +100,14 @@ export const reportScreenStyles = StyleSheet.create({
     gap: Spacing.two,
   },
   primaryActionButton: {
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two,
     borderRadius: BorderRadius.lg,
     minHeight: 48,
     alignItems: 'center',
     justifyContent: 'center',
   },
   secondaryActionButton: {
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two,
     borderRadius: BorderRadius.lg,
     minHeight: 44,
     alignItems: 'center',
@@ -118,10 +119,20 @@ export const reportScreenStyles = StyleSheet.create({
   },
   flexHalfButton: {
     flex: 1,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two,
     borderRadius: BorderRadius.lg,
     minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  actionButtonTextLg: {
+    fontSize: 14,
+  },
+  actionButtonTextMd: {
+    fontSize: 13,
+  },
+  actionButtonTextSm: {
+    fontSize: 12,
+  },
 });
+

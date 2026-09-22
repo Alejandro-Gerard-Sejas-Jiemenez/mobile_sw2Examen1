@@ -5,6 +5,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from '../ui/themed-text';
 import { ThemedView } from '../ui/themed-view';
 import { useTheme } from '@/hooks/use-theme';
@@ -42,6 +43,7 @@ export function VoicePromptInput({
     recordSeconds,
     lastAudioUri,
     isPlayingAudio,
+    isTranscribing,
     startRecording,
     stopRecording,
     togglePlayRecordedAudio,
@@ -54,20 +56,12 @@ export function VoicePromptInput({
 
   return (
     <ThemedView type="backgroundElement" style={[commonStyles.card, voicePromptStyles.container]}>
-      <View style={layoutStyles.rowBetween}>
-        <ThemedText type="smallBold" style={voicePromptStyles.headerTitle}>
-          COPILOT DE VOZ & SÍNTESIS DINÁMICA IA
-        </ThemedText>
-        <ThemedText
-          type="code"
-          themeColor="textSecondary"
-          style={voicePromptStyles.modelTag}>
-          Llama 3.2 1B
-        </ThemedText>
-      </View>
+      <ThemedText type="smallBold" style={voicePromptStyles.headerTitle}>
+        COPILOT DE VOZ & SÍNTESIS DINÁMICA IA
+      </ThemedText>
 
-      <ThemedText type="small" themeColor="textSecondary" style={voicePromptStyles.subtitle}>
-        Habla al micrófono de tu teléfono para registrar directivas del auditor o selecciona una plantilla:
+      <ThemedText type="small" themeColor="textSecondary" style={voicePromptStyles.subtitle} numberOfLines={2}>
+        Habla al micrófono o selecciona una plantilla de auditoría:
       </ThemedText>
 
       {/* Tone selection chips */}
@@ -119,25 +113,36 @@ export function VoicePromptInput({
           multiline
         />
 
+        {/* Botón voz — solo ícono mic / stop */}
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Grabar por voz"
+          accessibilityLabel={isRecording ? 'Detener grabación' : 'Grabar por voz'}
+          disabled={isTranscribing}
           onPress={isRecording ? stopRecording : startRecording}
           style={({ pressed }) => [
-            commonStyles.buttonSecondary,
             voicePromptStyles.recordButton,
             {
               backgroundColor: isRecording ? theme.danger : theme.tint,
-              opacity: pressed ? 0.7 : 1,
+              opacity: isTranscribing || pressed ? 0.7 : 1,
             },
           ]}>
-          <ThemedText
-            type="smallBold"
-            style={voicePromptStyles.recordButtonText}>
-            {isRecording ? `Detener (${recordSeconds}s)` : 'Hablar'}
-          </ThemedText>
+          {isTranscribing ? (
+            <ActivityIndicator color={theme.onTint} size="small" />
+          ) : (
+            <Ionicons
+              name={isRecording ? 'stop' : 'mic'}
+              size={20}
+              color={theme.onTint}
+            />
+          )}
         </Pressable>
       </View>
+
+      {isTranscribing ? (
+        <ThemedText type="small" themeColor="textSecondary" style={voicePromptStyles.recordingNotice}>
+          Transcribiendo audio con IA local…
+        </ThemedText>
+      ) : null}
 
       {/* Audio Playback Pill when recorded */}
       {lastAudioUri ? (

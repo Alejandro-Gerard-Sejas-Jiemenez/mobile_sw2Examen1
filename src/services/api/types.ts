@@ -5,7 +5,7 @@
 
 // --- Status & Enum Types ---
 
-export type AuditStatus = 'running' | 'completed' | 'paused';
+export type AuditStatus = 'running' | 'completed' | 'paused' | 'failed';
 
 export type TestBatteryStatus = 'queued' | 'running' | 'completed' | 'failed';
 
@@ -19,7 +19,6 @@ export type AlertReadState = 'unread' | 'read';
 
 export type ReportFormat = 'pdf' | 'markdown';
 
-export type ReportStatus = 'previewing' | 'compiling' | 'ready' | 'failed';
 
 export type DescubrimientoStatus = 'pendiente' | 'en_progreso' | 'completado' | 'fallido';
 
@@ -87,6 +86,17 @@ export interface Audit {
   completedAt: string | null;
   testBatteries: TestBattery[];
   metrics: AuditMetrics;
+  /** Injection-backend discovery scan id, discovered via GET /descubrimientos/ (created on the web, never by this app). */
+  scanId?: string | null;
+  /** Injection-backend attack session id, discovered via GET /ataques/ once the web launches the red-team.
+   *  When present, findings/report pull real judge-scored turns instead of local data. */
+  attackSessionId?: string | null;
+  /** Last discovery-scan status seen by `useSyncRemoteAudits` (backend_genvulnai `EstadoEscaneo`), used to detect phase changes. */
+  lastKnownScanStatus?: string | null;
+  /** Last attack-session status seen by `useSyncRemoteAudits` (backend_genvulnai `EstadoAtaque`), used to detect phase changes. */
+  lastKnownAttackStatus?: string | null;
+  /** Last `turnos_ejecutados` count seen for this audit's attack session, used to detect new turns between polls. */
+  lastKnownTurnosEjecutados?: number;
 }
 
 export interface Finding {
@@ -101,21 +111,21 @@ export interface Finding {
   reclassifiedAt: string | null;
 }
 
+export type AlertKind = 'phase' | 'finding' | 'report';
+
 export interface Alert {
   id: string;
+  /** Set for 'finding' alerts; empty string for 'phase'/'report' alerts (see `auditId` instead). */
   findingId: string;
   severityLabel: string;
   deliveredAt: string;
   readState: AlertReadState;
-}
-
-export interface ExecutiveReport {
-  id: string;
-  auditId: string;
-  format: ReportFormat;
-  generatedAt: string;
-  status: ReportStatus;
-  fileUri: string | null;
+  /** 'phase' = a scan/attack status change detected by `useSyncRemoteAudits`; 'report' = an on-device report finished generating (`useReportPreview`); 'finding' = tied to a specific Finding. Defaults to 'finding' for backend-sourced alerts. */
+  kind: AlertKind;
+  /** The local audit this alert is about — required for 'phase'/'report' alerts so the tap can navigate to its findings/report screen. */
+  auditId?: string;
+  /** Human-readable summary shown in the alerts list and the push notification body. */
+  message?: string;
 }
 
 // --- Store Interface ---
@@ -124,13 +134,17 @@ export interface IAuditStore {
   isReady(): boolean;
   getAudits(): Audit[];
   getAuditById(id: string): Audit | undefined;
+  getAuditByScanId(scanId: string): Audit | undefined;
   getFindings(auditId: string): Finding[];
   getFindingById(findingId: string): Finding | undefined;
-  createAudit(targetUrl: string, name?: string): Audit;
+  createAudit(targetUrl: string, name?: string, scanId?: string | null): Audit;
   addFinding(finding: Finding): void;
   updateAudit(audit: Audit): void;
+  setAttackSession(auditId: string, attackSessionId: string): void;
   deleteAudit(auditId: string): void;
   clearStore(): Promise<void>;
+  getAlerts(): Alert[];
+  addAlert(alert: Alert): void;
 }
 
 

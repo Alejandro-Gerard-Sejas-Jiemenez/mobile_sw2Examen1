@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { safeVoiceRecorder } from '@/services/audio/voice-recorder';
+import { transcribeAudio } from '@/services/ai/whisper-inference';
 import { AUDIO_CONSTANTS, VOICE_DIRECTIVE_PRESETS } from '@/constants/audio.constants';
 
 export interface UseVoiceDictationOptions {
@@ -12,6 +13,7 @@ export function useVoiceDictation(options?: UseVoiceDictationOptions) {
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [lastAudioUri, setLastAudioUri] = useState<string | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
 
   useEffect(() => {
     let timer: ReturnType<typeof setInterval> | undefined;
@@ -54,13 +56,29 @@ export function useVoiceDictation(options?: UseVoiceDictationOptions) {
         setLastAudioUri(result.uri);
       }
 
-      // Transcribe speech memo into auditor directive using preset templates
-      const sample =
-        VOICE_DIRECTIVE_PRESETS[
-          Math.floor(Math.random() * VOICE_DIRECTIVE_PRESETS.length)
-        ].text;
+      // Real on-device transcription (Whisper) when the recording produced a
+      // usable WAV file and the voice model is downloaded. Falls back to a
+      // random preset directive — same as before this feature existed — when
+      // transcription isn't available or comes back empty, so voice dictation
+      // never leaves the auditor with nothing to work with.
+      let directive: string | null = null;
+      if (result.uri) {
+        setIsTranscribing(true);
+        try {
+          directive = await transcribeAudio(result.uri, 'es');
+        } finally {
+          setIsTranscribing(false);
+        }
+      }
 
-      options?.onDirectiveCaptured?.(sample);
+      if (!directive) {
+        directive =
+          VOICE_DIRECTIVE_PRESETS[
+            Math.floor(Math.random() * VOICE_DIRECTIVE_PRESETS.length)
+          ].text;
+      }
+
+      options?.onDirectiveCaptured?.(directive);
     } catch (err) {
       console.warn('[use-voice-dictation] Error stopping recording:', err);
     }
@@ -85,6 +103,7 @@ export function useVoiceDictation(options?: UseVoiceDictationOptions) {
     recordSeconds,
     lastAudioUri,
     isPlayingAudio,
+    isTranscribing,
     startRecording,
     stopRecording,
     togglePlayRecordedAudio,

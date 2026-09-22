@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { apiRequest, ApiError } from './client';
 import type { Finding } from './types';
 import { auditStore } from './audit-store';
+import { IS_MOCK_MODE } from './mock-mode';
 import { API_ENDPOINTS, HTTP_STATUS, QUERY_KEYS } from '../../constants/api.constants';
 
 /**
@@ -16,6 +17,11 @@ export function useFindingDetail(
   const query = useQuery({
     queryKey: QUERY_KEYS.FINDING_DETAIL(findingId),
     queryFn: async () => {
+      if (IS_MOCK_MODE) {
+        const stored = auditStore.getFindingById(findingId);
+        if (stored) return stored;
+        throw new ApiError(HTTP_STATUS.NOT_FOUND, `Finding ${findingId} not found in mock store`);
+      }
       try {
         return await apiRequest<Finding>(API_ENDPOINTS.findingDetail(findingId));
       } catch (err) {

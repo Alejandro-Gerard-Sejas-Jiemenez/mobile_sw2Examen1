@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,6 +13,7 @@ export default function SignInScreen() {
   const [password, setPassword] = useState('');
   const { login, isSubmitting, error } = useLogin();
   const theme = useTheme();
+  const router = useRouter();
 
   const canSubmit = email.trim().length > 0 && password.length > 0 && !isSubmitting;
 
@@ -77,6 +79,16 @@ export default function SignInScreen() {
             )}
           </Pressable>
         </ThemedView>
+
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel="Ver Términos y Condiciones"
+          onPress={() => router.push('/(auth)/terms')}
+          style={({ pressed }) => [signInStyles.termsLink, { opacity: pressed ? 0.6 : 1 }]}>
+          <ThemedText type="small" themeColor="tint">
+            Términos y Condiciones
+          </ThemedText>
+        </Pressable>
       </SafeAreaView>
     </ThemedView>
   );

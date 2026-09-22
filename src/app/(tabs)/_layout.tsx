@@ -1,11 +1,12 @@
 import { Tabs } from 'expo-router';
-import { Image } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { useTheme } from '@/hooks/use-theme';
-import { tabsStyles } from '@/styles';
+import { useSyncRemoteAudits } from '@/services/api';
 
 export default function AppTabs() {
   const theme = useTheme();
+  useSyncRemoteAudits();
 
   return (
     <Tabs
@@ -23,48 +24,34 @@ export default function AppTabs() {
         options={{
           title: 'Monitoring',
           tabBarIcon: ({ color, size }) => (
-            <Image
-              source={require('@/assets/images/tabIcons/home.png')}
-              style={[tabsStyles.tabIcon, { width: size || 24, height: size || 24, tintColor: color }]}
-              resizeMode="contain"
-            />
+            <Ionicons name="shield-half-outline" size={size ?? 24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="alerts"
         options={{
-          title: 'Alerts',
+          title: 'Alertas',
           tabBarIcon: ({ color, size }) => (
-            <Image
-              source={require('@/assets/images/tabIcons/explore.png')}
-              style={[tabsStyles.tabIcon, { width: size || 24, height: size || 24, tintColor: color }]}
-              resizeMode="contain"
-            />
+            <Ionicons name="notifications-outline" size={size ?? 24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="audits/[auditId]/findings"
+        name="settings"
         options={{
-          href: null,
-          tabBarStyle: { display: 'none' },
+          title: 'Ajustes',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings-outline" size={size ?? 24} color={color} />
+          ),
         }}
       />
-      <Tabs.Screen
-        name="audits/[auditId]/report"
-        options={{
-          href: null,
-          tabBarStyle: { display: 'none' },
-        }}
-      />
-      <Tabs.Screen
-        name="findings/[findingId]"
-        options={{
-          href: null,
-          tabBarStyle: { display: 'none' },
-        }}
-      />
+      <Tabs.Screen name="audits/[auditId]/findings" options={{ href: null, tabBarStyle: { display: 'none' } }} />
+      <Tabs.Screen name="audits/[auditId]/report" options={{ href: null, tabBarStyle: { display: 'none' } }} />
+      <Tabs.Screen name="findings/[findingId]" options={{ href: null, tabBarStyle: { display: 'none' } }} />
+      <Tabs.Screen name="report-history" options={{ href: null, tabBarStyle: { display: 'none' } }} />
+      <Tabs.Screen name="report-history/[reportId]" options={{ href: null, tabBarStyle: { display: 'none' } }} />
     </Tabs>
   );
 }
+
